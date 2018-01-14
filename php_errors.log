@@ -1,0 +1,5 @@
+[13-Jan-2018 21:02:49 UTC] PHP Parse error:  syntax error, unexpected 'array_keys' (T_STRING) in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 39
+[13-Jan-2018 21:09:21 UTC] PHP Parse error:  syntax error, unexpected '$interp_temp_string_value' (T_VARIABLE) in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 41
+[13-Jan-2018 21:43:18 UTC] PHP Parse error:  syntax error, unexpected '"'"' (T_CONSTANT_ENCAPSED_STRING) in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 45
+[13-Jan-2018 23:23:29 UTC] PHP Parse error:  syntax error, unexpected '}' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 109
+[13-Jan-2018 23:28:58 UTC] PHP Parse error:  syntax error, unexpected '=' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 104
