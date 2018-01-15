@@ -1,153 +1,3 @@
-<?php
-    $host = "127.0.0.1";
-    $user = "jl56923";
-    $pass = "";
-    $db = "c9";
-    $port = 3306;
-    
-    $message = "";
-    
-    $connection = mysqli_connect($host, $user, $pass, $db, $port)or die(mysql_error());
-    
-    if (array_key_exists("create_eeg", $_POST)) {
-        
-        print_r($_POST);
-        
-        $find_EEG_id = "SELECT MAX(EEG_unique_id) FROM EEG_interpretation_s WHERE user_ID=1";
-        $eeg_unique_id = 0;
-        $result = mysqli_query($connection, $find_EEG_id);
-        if ($result && mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_array($result);
-            if (is_null($row['MAX(EEG_unique_id)'])) {
-                $eeg_unique_id = 1;
-            } else {
-                $eeg_unique_id = $row['MAX(EEG_unique_id)'] + 1;
-            }
-        }
-        
-        $interp_query_array = $_POST['EEG_interpretation_s'];
-        
-        # Loop through $interp_query_array to replace the strings with int values where appropriate. Otherwise, put single quotes around the value because then the value is a string and needs to be contained within quotes in order to be inserted into a table.
-        foreach ($interp_query_array as $key => $value) {
-            $query_parameter_lookup = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
-            $result = mysqli_query($connection, $query_parameter_lookup);
-            if ($result && mysqli_num_rows($result) > 0) {
-                $row = mysqli_fetch_array($result);
-                $interp_query_array[$key] = $row['parameter_int_value'];
-            } else {
-                $temp = "'";
-                $temp .= $value;
-                $temp .= "'";
-                $interp_query_array[$key] = $temp;
-            }
-        }
-        
-        $query_insert_interp_master = "INSERT INTO EEG_interpretation_s ";
-        $interp_temp_string_col = "(EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
-        $interp_temp_string_col .= implode(", ", array_keys($interp_query_array));
-        $interp_temp_string_col .= ") ";
-        
-        $interp_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ".count($_POST['EEG_epi_s']).", ";
-        $interp_temp_string_value .= implode(", ", array_values($interp_query_array));
-        $interp_temp_string_value .= ")";
-        
-        $query_insert_interp_master .= $interp_temp_string_col.$interp_temp_string_value;
-        $message .= "The query to insert a record into interp is: ";
-        $message .= $query_insert_interp_master;
-        $message .= "<br>";
-        
-        mysqli_query($connection, $query_insert_interp_master);
-        
-        ###
-        /* Now you want to insert the entry for the scoring template for the EEG. It's similar to the above except
-        that you don't need to look up any int values, you can just go ahead and insert the values from the score
-        array into the table by imploding the values, etc.*/
-        
-        $interp_score_query_array = $_POST['EEG_interpretation_score'];
-        
-        $query_insert_interp_score_master = "INSERT INTO EEG_interpretation_s ";
-        $interp_temp_string_score_col = "(EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
-        $interp_temp_string_score_col .= implode(", ", array_keys($interp_score_query_array));
-        $interp_temp_string_score_col .= ") ";
-        
-        $interp_temp_string_score_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ".count($_POST['EEG_epi_s']).", ";
-        $interp_temp_string_score_value .= implode(", ", array_values($interp_score_query_array));
-        $interp_temp_string_score_value .= ")";
-        
-        $query_insert_interp_score_master .= $interp_temp_string_score_col.$interp_temp_string_score_value;
-        $message .= "The query to insert the score template for an EEG into interp is: ";
-        $message .= $query_insert_interp_score_master;
-        $message .= "<br>";
-        
-        mysqli_query($connection, $query_insert_interp_score_master);
-        
-        ###
-        # Queries to insert values for the epi findings.
-        
-        $epi_query_array = $_POST['EEG_epi_s'];
-        $epi_queries = [];
-        
-        # Loop through each epi finding, and replace the text with the appropriate int value. Also add the other parameters needed to create query, specifically values for the other columns.
-        for ($i = 1; $i <= count($epi_query_array); $i++) {
-            foreach($epi_query_array[$i] as $key => $value) {
-                $query_parameter_lookup = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
-                $result = mysqli_query($connection, $query_parameter_lookup);
-                if ($result && mysqli_num_rows($result) > 0) {
-                    $row = mysqli_fetch_array($result);
-                    $epi_query_array[$i][$key] = $row['parameter_int_value'];
-                }
-            }
-        }
-        
-        # Now build the epi_queries array.
-        for ($i = 1; $i <= count($epi_query_array); $i++) {
-            $epi_queries[$i] = "INSERT INTO EEG_epi_s ";
-            $epi_temp_string_col = "(EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
-            $epi_temp_string_col .= implode(", ", array_keys($epi_query_array[$i]));
-            $epi_temp_string_col .= ") ";
-            
-            $epi_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ";
-            $epi_temp_string_value .= implode(", ", array_values($epi_query_array[$i]));
-            $epi_temp_string_value .= ")";
-            
-            $epi_queries[$i] .= $epi_temp_string_col.$epi_temp_string_value;
-        }
-        
-        for ($i = 1; $i <= count($epi_queries); $i++) {
-            mysqli_query($connection, $epi_queries[$i]);
-            $message .= "The query to insert a record into epi is: ";
-            $message .= $epi_queries[$i];
-            $message .= "<br>";
-        }
-        
-        ###
-        $epi_score_query_array = $_POST['EEG_epi_score'];
-        $epi_score_queries = [];
-        
-        for ($i = 1; $i <= count($epi_score_query_array); $i++) {
-            $epi_score_queries[$i] = "INSERT INTO EEG_epi_s";
-            $epi_score_temp_string_col = "(EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
-            $epi_score_temp_string_col .= implode(", ", array_keys($epi_score_query_array[$i]));
-            $epi_score_temp_string_col .= ") ";
-            
-            $epi_score_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ";
-            $epi_score_temp_string_value .= implode(", ", array_values($epi_score_query_array[$i]));
-            $epi_score_temp_string_value .= ")";
-            
-            $epi_score_queries[$i] .= $epi_score_temp_string_col.$epi_score_temp_string_value;
-        }
-        
-        for ($i = 1; $i <= count($epi_score_queries); $i++) {
-            mysqli_query($connection, $epi_score_queries[$i]);
-            $message .= "The query to insert a scoring template record into epi is: ";
-            $message .= $epi_score_queries[$i];
-            $message .= "<br><br>";
-        }
-        
-    }
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -223,7 +73,7 @@
         echo $message;
         ?></div>
         
-        <form method="post" id="EEG_interpretation_form">
+        <form action="report_eeg_s.php" method="post" id="EEG_interpretation_form">
         <section>
             <h3>Background information</h3>
             
@@ -241,14 +91,7 @@
                 </div>
             </div>
         </section>
-        <!-- Textarea for overall interpretation; not sure how this was being used in original MREEG. Would definitely have to clean the input from this textarea to avoid SQL injection or other hacks.
-        <div class="form-group row">
-            <label for="comments" class="col-sm-2 col-form-label">Comments/free text</label>
-            <div class="col-sm-7">
-                <textarea class="form-control" id="comments" rows="5"></textarea>
-            </div>
-        </div>
-        -->
+        
         <section>
             <h3>EEG findings</h3>
             
