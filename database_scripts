@@ -8,16 +8,17 @@ use c9
 CREATE DATABASE mreeg;
 
 CREATE TABLE Users (
-    resident_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE EEG_Interpretation (
-    EEG_unique_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    resident_ID INT UNSIGNED,
+CREATE TABLE EEG_interpretation (
+    EEG_interpretation_row INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    EEG_unique_id INT UNSIGNED,
+    user_id INT UNSIGNED,
     scoring_template BOOL,
     EEG_indications TEXT,
     medications TEXT,
@@ -39,18 +40,18 @@ CREATE TABLE EEG_Interpretation (
 );
 
 CREATE TABLE EEG_epi (
-    epi_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    EEG_epi_row INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     EEG_unique_id INT UNSIGNED,
-    resident_ID INT UNSIGNED,
+    user_id INT UNSIGNED,
     scoring_template BOOL,
     spike_lateralization INT UNSIGNED,
     spike_localization INT UNSIGNED
 );
 
 CREATE TABLE EEG_sz (
-    sz_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    EEG_sz_row INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     EEG_unique_id INT UNSIGNED,
-    resident_ID INT UNSIGNED,
+    user_id INT UNSIGNED,
     scoring_template BOOL
 );
 
@@ -62,14 +63,15 @@ mysql-ctl cli
 use c9
 
 CREATE TABLE Users_s (
-    resident_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE EEG_Interpretation_s (
-    EEG_unique_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    resident_ID INT UNSIGNED,
+CREATE TABLE EEG_interpretation_s_s (
+    EEG_interpretation_s_row INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    EEG_unique_id INT UNSIGNED,
+    user_id INT UNSIGNED,
     scoring_template BOOL,
     EEG_indications TEXT,
     medications TEXT,
@@ -81,105 +83,105 @@ CREATE TABLE EEG_Interpretation_s (
 );
 
 CREATE TABLE EEG_epi_s (
-    epi_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    EEG_epi_row INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     EEG_unique_id INT UNSIGNED,
-    resident_ID INT UNSIGNED,
+    user_id INT UNSIGNED,
     scoring_template BOOL,
     spike_lateralization INT UNSIGNED,
     spike_localization INT UNSIGNED
 );
 
 // More commands:
-INSERT INTO `Users_s` VALUES (NULL, 'master_key@example.com', 'abc123');
+INSERT INTO `users_s` VALUES (NULL, 'master_key@example.com', 'abc123');
 
 // Create a lookup table called 'values_dictionary' which will map the
 // text of parameters to integers (e.g. 'generalized' -> 1, 'frontal' -> 2 etc.).
 // For the small scale model, the following parameters will need lookup values.
-CREATE TABLE Values_dictionary (
-    parameter_ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE values_dictionary (
+    parameter_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     parameter_table VARCHAR(255),
     parameter_name VARCHAR(255),
     parameter_int_value UNSIGNED TINYINT(3),
     parameter_text_value VARCHAR(255)
 );
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'Interpretation', 'PDR', 1, 'none'),
-(NULL, 'Interpretation', 'PDR', 2, '<5'),
-(NULL, 'Interpretation', 'PDR', 3, '5'),
-(NULL, 'Interpretation', 'PDR', 4, '6'),
-(NULL, 'Interpretation', 'PDR', 5, '7'),
-(NULL, 'Interpretation', 'PDR', 6, '8'),
-(NULL, 'Interpretation', 'PDR', 7, '9'),
-(NULL, 'Interpretation', 'PDR', 8, '10'),
-(NULL, 'Interpretation', 'PDR', 9, '11'),
-(NULL, 'Interpretation', 'PDR', 10, '12'),
-(NULL, 'Interpretation', 'PDR', 11, '13'),
-(NULL, 'Interpretation', 'PDR', 12, '14');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_interpretation_s', 'PDR', 1, 'none'),
+(NULL, 'EEG_interpretation_s', 'PDR', 2, '<5'),
+(NULL, 'EEG_interpretation_s', 'PDR', 3, '5'),
+(NULL, 'EEG_interpretation_s', 'PDR', 4, '6'),
+(NULL, 'EEG_interpretation_s', 'PDR', 5, '7'),
+(NULL, 'EEG_interpretation_s', 'PDR', 6, '8'),
+(NULL, 'EEG_interpretation_s', 'PDR', 7, '9'),
+(NULL, 'EEG_interpretation_s', 'PDR', 8, '10'),
+(NULL, 'EEG_interpretation_s', 'PDR', 9, '11'),
+(NULL, 'EEG_interpretation_s', 'PDR', 10, '12'),
+(NULL, 'EEG_interpretation_s', 'PDR', 11, '13'),
+(NULL, 'EEG_interpretation_s', 'PDR', 12, '14');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'Interpretation', 'normalVariants', 1, 'none applicable'),
-(NULL, 'Interpretation', 'normalVariants', 2, 'rhythmic midtemporal theta of drowsiness (RMTD)'),
-(NULL, 'Interpretation', 'normalVariants', 3, 'POSTS'),
-(NULL, 'Interpretation', 'normalVariants', 4, '6 Hz phantom spike-wave'),
-(NULL, 'Interpretation', 'normalVariants', 5, 'SREDA'),
-(NULL, 'Interpretation', 'normalVariants', 6, 'Ciganek rhythm (midline theta)'),
-(NULL, 'Interpretation', 'normalVariants', 7, 'lambda'),
-(NULL, 'Interpretation', 'normalVariants', 8, 'mu'),
-(NULL, 'Interpretation', 'normalVariants', 9, 'breach rhythm (skull defect) - right'),
-(NULL, 'Interpretation', 'normalVariants', 10, 'breach rhythm (skull defect) - left'),
-(NULL, 'Interpretation', 'normalVariants', 11, 'wicket waves'),
-(NULL, 'Interpretation', 'normalVariants', 12, 'benign epileptiform transients of sleep (BETS or SSS)'),
-(NULL, 'Interpretation', 'normalVariants', 13, 'posterior slowing of youth');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_interpretation_s', 'normal_variants', 1, 'none applicable'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 2, 'rhythmic midtemporal theta of drowsiness (RMTD)'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 3, 'POSTS'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 4, '6 Hz phantom spike-wave'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 5, 'SREDA'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 6, 'Ciganek rhythm (midline theta)'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 7, 'lambda'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 8, 'mu'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 9, 'breach rhythm (skull defect) - right'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 10, 'breach rhythm (skull defect) - left'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 11, 'wicket waves'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 12, 'benign epileptiform transients of sleep (BETS or SSS)'),
+(NULL, 'EEG_interpretation_s', 'normal_variants', 13, 'posterior slowing of youth');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'EEG_epi_s', 'spikeLateralization', 1, 'bilateral R>L'),
-(NULL, 'EEG_epi_s', 'spikeLateralization', 2, 'bilateral L>R'),
-(NULL, 'EEG_epi_s', 'spikeLateralization', 3, 'left'),
-(NULL, 'EEG_epi_s', 'spikeLateralization', 4, 'right'),
-(NULL, 'EEG_epi_s', 'spikeLateralization', 5, 'vertex'),
-(NULL, 'EEG_epi_s', 'spikeLateralization', 6, 'bilateral L=R');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_epi_s', 'spike_lateralization', 1, 'bilateral R>L'),
+(NULL, 'EEG_epi_s', 'spike_lateralization', 2, 'bilateral L>R'),
+(NULL, 'EEG_epi_s', 'spike_lateralization', 3, 'left'),
+(NULL, 'EEG_epi_s', 'spike_lateralization', 4, 'right'),
+(NULL, 'EEG_epi_s', 'spike_lateralization', 5, 'vertex'),
+(NULL, 'EEG_epi_s', 'spike_lateralization', 6, 'bilateral L=R');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'EEG_epi_s', 'spikeLocalization', 1, 'generalized'),
-(NULL, 'EEG_epi_s', 'spikeLocalization', 2, 'frontal'),
-(NULL, 'EEG_epi_s', 'spikeLocalization', 3, 'temporal'),
-(NULL, 'EEG_epi_s', 'spikeLocalization', 4, 'parietal'),
-(NULL, 'EEG_epi_s', 'spikeLocalization', 5, 'occipital'),
-(NULL, 'EEG_epi_s', 'spikeLocalization', 6, 'central');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_epi_s', 'spike_localization', 1, 'generalized'),
+(NULL, 'EEG_epi_s', 'spike_localization', 2, 'frontal'),
+(NULL, 'EEG_epi_s', 'spike_localization', 3, 'temporal'),
+(NULL, 'EEG_epi_s', 'spike_localization', 4, 'parietal'),
+(NULL, 'EEG_epi_s', 'spike_localization', 5, 'occipital'),
+(NULL, 'EEG_epi_s', 'spike_localization', 6, 'central');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'EEG_epi_s', 'spikePrevalence', 1, 'continuous'),
-(NULL, 'EEG_epi_s', 'spikePrevalence', 2, 'every few seconds'),
-(NULL, 'EEG_epi_s', 'spikePrevalence', 3, 'every few minutes'),
-(NULL, 'EEG_epi_s', 'spikePrevalence', 4, 'rare');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_epi_s', 'spike_prevalence', 1, 'continuous'),
+(NULL, 'EEG_epi_s', 'spike_prevalence', 2, 'every few seconds'),
+(NULL, 'EEG_epi_s', 'spike_prevalence', 3, 'every few minutes'),
+(NULL, 'EEG_epi_s', 'spike_prevalence', 4, 'rare');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'EEG_epi_s', 'spikeModifier', 1, 'with stimulation'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 2, 'periodic'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 3, 'low amplitude'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 4, 'high amplitude'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 5, 'polyspike'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 6, 'triphasic'),
-(NULL, 'EEG_epi_s', 'spikeModifier', 7, 'sleep augmented');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_epi_s', 'spike_modifier', 1, 'with stimulation'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 2, 'periodic'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 3, 'low amplitude'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 4, 'high amplitude'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 5, 'polyspike'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 6, 'triphasic'),
+(NULL, 'EEG_epi_s', 'spike_modifier', 7, 'sleep augmented');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'Interpretation', 'eegAbnSummary', 1, 'excessive beta likely reflecting a medication effect'),
-(NULL, 'Interpretation', 'eegAbnSummary', 2, 'focal slowing'),
-(NULL, 'Interpretation', 'eegAbnSummary', 3, 'multifocal slowing'),
-(NULL, 'Interpretation', 'eegAbnSummary', 4, 'generalized slowing'),
-(NULL, 'Interpretation', 'eegAbnSummary', 5, 'focal epileptiform discharges'),
-(NULL, 'Interpretation', 'eegAbnSummary', 6, 'multifocal epileptiform discharges'),
-(NULL, 'Interpretation', 'eegAbnSummary', 7, 'generalized epileptiform discharges'),
-(NULL, 'Interpretation', 'eegAbnSummary', 8, 'focal seizure(s)'),
-(NULL, 'Interpretation', 'eegAbnSummary', 9, 'generalized seizure(s)'),
-(NULL, 'Interpretation', 'eegAbnSummary', 10, 'fragmented sleep'),
-(NULL, 'Interpretation', 'eegAbnSummary', 11, 'hypoxia (low SpO2)');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_interpretation_s', 'abn_summary', 1, 'excessive beta likely reflecting a medication effect'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 2, 'focal slowing'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 3, 'multifocal slowing'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 4, 'generalized slowing'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 5, 'focal epileptiform discharges'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 6, 'multifocal epileptiform discharges'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 7, 'generalized epileptiform discharges'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 8, 'focal seizure(s)'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 9, 'generalized seizure(s)'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 10, 'fragmented sleep'),
+(NULL, 'EEG_interpretation_s', 'abn_summary', 11, 'hypoxia (low SpO2)');
 
-INSERT INTO `Values_dictionary`
-VALUES (NULL, 'Interpretation', 'interpretation', 1, 'indicate diffuse encephalopathy'),
-(NULL, 'Interpretation', 'interpretation', 2, 'indicate cortical dysfunction'),
-(NULL, 'Interpretation', 'interpretation', 3, 'are abnormal but not definitively epileptic'),
-(NULL, 'Interpretation', 'interpretation', 4, 'suggest epilepsy'),
-(NULL, 'Interpretation', 'interpretation', 5, 'suggest NES'),
-(NULL, 'Interpretation', 'interpretation', 6, 'may indicate a sleep disorder');
+INSERT INTO `values_dictionary`
+VALUES (NULL, 'EEG_interpretation_s', 'interpretation', 1, 'indicate diffuse encephalopathy'),
+(NULL, 'EEG_interpretation_s', 'interpretation', 2, 'indicate cortical dysfunction'),
+(NULL, 'EEG_interpretation_s', 'interpretation', 3, 'are abnormal but not definitively epileptic'),
+(NULL, 'EEG_interpretation_s', 'interpretation', 4, 'suggest epilepsy'),
+(NULL, 'EEG_interpretation_s', 'interpretation', 5, 'suggest NES'),
+(NULL, 'EEG_interpretation_s', 'interpretation', 6, 'may indicate a sleep disorder');

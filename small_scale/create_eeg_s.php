@@ -9,23 +9,27 @@
     
     $connection = mysqli_connect($host, $user, $pass, $db, $port)or die(mysql_error());
     
-    if (array_key_exists("submit", $_POST)) {
+    if (array_key_exists("create_eeg", $_POST)) {
         
         print_r($_POST);
         
-        /* So you want to go through every key (which is the parameter name) and its corresponding value.
-        You attempt to look up the parameter_int_value of each key-> value pair; if there is no int value,
-        then you insert the value of that key directly into the databse. If there is an int value, then you
-        insert the int value instead. There are going to be two insert statements built inside of this foreach
-        loop: one that inserts values into the Interpretation_s table, and the other that inserts values into
-        the epi_s table.*/
+        $find_EEG_id = "SELECT MAX(EEG_unique_id) FROM EEG_interpretation_s WHERE user_ID=1";
+        $eeg_unique_id = 0;
+        $result = mysqli_query($connection, $find_EEG_id);
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_array($result);
+            if (is_null($row['MAX(EEG_unique_id)'])) {
+                $eeg_unique_id = 1;
+            } else {
+                $eeg_unique_id = $row['MAX(EEG_unique_id)'] + 1;
+            }
+        }
         
-        $interp_query_array = $_POST['EEG_Interpretation_s'];
+        $interp_query_array = $_POST['EEG_interpretation_s'];
         
         # Loop through $interp_query_array to replace the strings with int values where appropriate. Otherwise, put single quotes around the value because then the value is a string and needs to be contained within quotes in order to be inserted into a table.
-        # Perform this loop before adding in the EEG_unique_ID, the resident_ID, etc, because 1) you'll be looping through those values unnecessarily when in fact you are setting those key-value pairs manually, and so you *know* already that there is no point in looking up the int_value, and then 2) since these do not have lookup value, you will end up getting single quotes around them inappropriately.
         foreach ($interp_query_array as $key => $value) {
-            $query_parameter_lookup = "SELECT parameter_int_value FROM Values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
+            $query_parameter_lookup = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
             $result = mysqli_query($connection, $query_parameter_lookup);
             if ($result && mysqli_num_rows($result) > 0) {
                 $row = mysqli_fetch_array($result);
@@ -38,67 +42,75 @@
             }
         }
         
-        $interp_query_array["EEG_unique_ID"] = 'NULL';
-        $interp_query_array["resident_ID"] = 1;
-        $interp_query_array["scoring_template"] = 0;
-        $interp_query_array["spikes"] = count($_POST['EEG_epi_s']);
-        
-        $query_insert_interp_master = "INSERT INTO EEG_Interpretation_s ";
-        $interp_temp_string_col = "(";
+        $query_insert_interp_master = "INSERT INTO EEG_interpretation_s ";
+        $interp_temp_string_col = "(EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
         $interp_temp_string_col .= implode(", ", array_keys($interp_query_array));
         $interp_temp_string_col .= ") ";
         
-        $interp_temp_string_value = "VALUES (";
+        $interp_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ".count($_POST['EEG_epi_s']).", ";
         $interp_temp_string_value .= implode(", ", array_values($interp_query_array));
         $interp_temp_string_value .= ")";
         
-        $query_insert_interp_master .= $interp_temp_string_col;
-        $query_insert_interp_master .= $interp_temp_string_value;
+        $query_insert_interp_master .= $interp_temp_string_col.$interp_temp_string_value;
         $message .= "The query to insert a record into interp is: ";
         $message .= $query_insert_interp_master;
         $message .= "<br>";
         
         mysqli_query($connection, $query_insert_interp_master);
-        $eeg_ID = mysqli_insert_id($connection);
         
-        /****************/
+        ###
+        /* Now you want to insert the entry for the scoring template for the EEG. It's similar to the above except
+        that you don't need to look up any int values, you can just go ahead and insert the values from the score
+        array into the table by imploding the values, etc.*/
+        
+        $interp_score_query_array = $_POST['EEG_interpretation_score'];
+        
+        $query_insert_interp_score_master = "INSERT INTO EEG_interpretation_s ";
+        $interp_temp_string_score_col = "(EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
+        $interp_temp_string_score_col .= implode(", ", array_keys($interp_score_query_array));
+        $interp_temp_string_score_col .= ") ";
+        
+        $interp_temp_string_score_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ".count($_POST['EEG_epi_s']).", ";
+        $interp_temp_string_score_value .= implode(", ", array_values($interp_score_query_array));
+        $interp_temp_string_score_value .= ")";
+        
+        $query_insert_interp_score_master .= $interp_temp_string_score_col.$interp_temp_string_score_value;
+        $message .= "The query to insert the score template for an EEG into interp is: ";
+        $message .= $query_insert_interp_score_master;
+        $message .= "<br>";
+        
+        mysqli_query($connection, $query_insert_interp_score_master);
+        
+        ###
+        # Queries to insert values for the epi findings.
+        
         $epi_query_array = $_POST['EEG_epi_s'];
         $epi_queries = [];
-        
-        print_r($epi_query_array);
         
         # Loop through each epi finding, and replace the text with the appropriate int value. Also add the other parameters needed to create query, specifically values for the other columns.
         for ($i = 1; $i <= count($epi_query_array); $i++) {
             foreach($epi_query_array[$i] as $key => $value) {
-                $query_parameter_lookup = "SELECT parameter_int_value FROM Values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
+                $query_parameter_lookup = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$key."' AND parameter_text_value='".$value."' LIMIT 1";
                 $result = mysqli_query($connection, $query_parameter_lookup);
                 if ($result && mysqli_num_rows($result) > 0) {
                     $row = mysqli_fetch_array($result);
                     $epi_query_array[$i][$key] = $row['parameter_int_value'];
                 }
             }
-            
-            $epi_query_array[$i]["epi_ID"] = 'NULL';
-            $epi_query_array[$i]["EEG_unique_ID"] = $eeg_ID;
-            $epi_query_array[$i]["resident_ID"] = 1;
-            $epi_query_array[$i]["scoring_template"] = 0;
         }
-        
-        print_r($epi_query_array);
         
         # Now build the epi_queries array.
         for ($i = 1; $i <= count($epi_query_array); $i++) {
             $epi_queries[$i] = "INSERT INTO EEG_epi_s ";
-            $epi_temp_string_col = "(";
+            $epi_temp_string_col = "(EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
             $epi_temp_string_col .= implode(", ", array_keys($epi_query_array[$i]));
             $epi_temp_string_col .= ") ";
             
-            $epi_temp_string_value = "VALUES (";
+            $epi_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ";
             $epi_temp_string_value .= implode(", ", array_values($epi_query_array[$i]));
             $epi_temp_string_value .= ")";
             
-            $epi_queries[$i] .= $epi_temp_string_col;
-            $epi_queries[$i] .= $epi_temp_string_value;
+            $epi_queries[$i] .= $epi_temp_string_col.$epi_temp_string_value;
         }
         
         for ($i = 1; $i <= count($epi_queries); $i++) {
@@ -106,6 +118,30 @@
             $message .= "The query to insert a record into epi is: ";
             $message .= $epi_queries[$i];
             $message .= "<br>";
+        }
+        
+        ###
+        $epi_score_query_array = $_POST['EEG_epi_score'];
+        $epi_score_queries = [];
+        
+        for ($i = 1; $i <= count($epi_score_query_array); $i++) {
+            $epi_score_queries[$i] = "INSERT INTO EEG_epi_s";
+            $epi_score_temp_string_col = "(EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
+            $epi_score_temp_string_col .= implode(", ", array_keys($epi_score_query_array[$i]));
+            $epi_score_temp_string_col .= ") ";
+            
+            $epi_score_temp_string_value = "VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ";
+            $epi_score_temp_string_value .= implode(", ", array_values($epi_score_query_array[$i]));
+            $epi_score_temp_string_value .= ")";
+            
+            $epi_score_queries[$i] .= $epi_score_temp_string_col.$epi_score_temp_string_value;
+        }
+        
+        for ($i = 1; $i <= count($epi_score_queries); $i++) {
+            mysqli_query($connection, $epi_score_queries[$i]);
+            $message .= "The query to insert a scoring template record into epi is: ";
+            $message .= $epi_score_queries[$i];
+            $message .= "<br><br>";
         }
         
     }
@@ -192,23 +228,23 @@
             <h3>Background information</h3>
             
             <div class="form-group row">
-                <label for="EEG_indications" class="col-sm-3 col-form-label">EEG indications</label>
-                <div class="col-sm-8">
-                    <textarea class="form-control" id="EEG_indications" name="EEG_Interpretation_s[EEG_indications]" rows="3"></textarea>
+                <label for="EEG_indications" class="col-sm-2 col-form-label">EEG indications</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="EEG_indications" name="EEG_interpretation_s[EEG_indications]" rows="3"></textarea>
                 </div>
             </div>
             
             <div class="form-group row">
-                <label for="medications" class="col-sm-3 col-form-label">Current medications</label>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" id="medications" name="EEG_Interpretation_s[medications]">
+                <label for="medications" class="col-sm-2 col-form-label">Current medications</label>
+                <div class="col-sm-10">
+                    <input class="form-control" type="text" id="medications" name="EEG_interpretation_s[medications]">
                 </div>
             </div>
         </section>
         <!-- Textarea for overall interpretation; not sure how this was being used in original MREEG. Would definitely have to clean the input from this textarea to avoid SQL injection or other hacks.
         <div class="form-group row">
-            <label for="comments" class="col-sm-3 col-form-label">Comments/free text</label>
-            <div class="col-sm-8">
+            <label for="comments" class="col-sm-2 col-form-label">Comments/free text</label>
+            <div class="col-sm-7">
                 <textarea class="form-control" id="comments" rows="5"></textarea>
             </div>
         </div>
@@ -217,8 +253,8 @@
             <h3>EEG findings</h3>
             
             <div class="form-group row">
-                <label for="pdr_value" class="col-sm-3 col-form-label">PDR</label>
-                    <select class="form-control col-sm-8" id="pdr_value" name="EEG_Interpretation_s[pdr_value]">
+                <label for="pdr_value" class="col-sm-2 col-form-label">PDR</label>
+                    <select class="form-control col-sm-7" id="pdr_value" name="EEG_interpretation_s[pdr_value]">
                         <option>none</option>
                         <option>&lt;5</option>
                         <option>5</option>
@@ -232,12 +268,16 @@
                         <option>13</option>
                         <option>14</option>
                     </select>
+                <label for="pdr_value_score" class="col-sm-2 col-form-label">PDR score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_interpretation_score[pdr_value]">
+                </div>
             </div>
                 
             <!-- Could do radio buttons instead of select multiple from a list as well. If you are going to allow the user to select multiple values, will have to figure out how to enter these as a multivalued field. Will plan to use implode/explode to store multiple values as a comma delimited string. -->
             <div class="form-group row">
-                <label for="normal_variants" class="col-sm-3 col-form-label">Normal variants</label>
-                    <select multiple class="form-control col-sm-8" id="normal_variants" name="EEG_Interpretation_s[normal_variants]">
+                <label for="normal_variants" class="col-sm-2 col-form-label">Normal variants</label>
+                    <select multiple class="form-control col-sm-7" id="normal_variants" name="EEG_interpretation_s[normal_variants]">
                         <option>none applicable</option>
                         <option>rhythmic midtemporal theta of drowsiness (RMTD)</option>
                         <option>POSTS</option>
@@ -252,6 +292,10 @@
                         <option>benign epileptiform transients of sleep (BETS or SSS)</option>
                         <option>posterior slowing of youth</option>
                     </select>
+                <label for="normal_variants_score" class="col-sm-2 col-form-label">Normal variants score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_interpretation_score[normal_variants]">
+                </div>
             </div>
         
         <!-- This is the beginning of the 3 subtables that are part of the EEG interpretation: EEG_slow, EEG_sz, and EEG_epi.
@@ -264,8 +308,8 @@
             <p class="spike">Spike 1</p>
             <fieldset>
             <div class="form-group row">
-                <label for="spike_lateralization" class="col-sm-3 col-form-label">Spike lateralization</label>
-                    <select class="form-control col-sm-8" class = "spike_lateralization" name="EEG_epi_s[1][spike_lateralization]">
+                <label for="spike_lateralization" class="col-sm-2 col-form-label">Spike lateralization</label>
+                    <select class="form-control col-sm-7" class="spike_lateralization" name="EEG_epi_s[1][spike_lateralization]">
                         <option>bilateral R>L</option>
                         <option>bilateral L>R</option>
                         <option>left</option>
@@ -273,10 +317,14 @@
                         <option>vertex</option>
                         <option>bilateral L=R</option>
                     </select>
+                <label for="spike_lateralization_score" class="col-sm-2 col-form-label">Spike lateralization score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_epi_score[1][spike_lateralization]">
+                </div>
             </div>
             <div class="form-group row">
-                <label for="spike_localization" class="col-sm-3 col-form-label">Spike localization</label>
-                    <select class="form-control col-sm-8" class = "spike_localization" name="EEG_epi_s[1][spike_localization]">
+                <label for="spike_localization" class="col-sm-2 col-form-label">Spike localization</label>
+                    <select class="form-control col-sm-7" class = "spike_localization" name="EEG_epi_s[1][spike_localization]">
                         <option>generalized</option>
                         <option>frontal</option>
                         <option>temporal</option>
@@ -284,19 +332,27 @@
                         <option>occipital</option>
                         <option>central</option>
                     </select>
+                <label for="spike_localization_score" class="col-sm-2 col-form-label">Spike localization score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_epi_score[1][spike_localization]">
+                </div>
             </div>
             <div class="form-group row">
-                <label for="spike_prevalence" class="col-sm-3 col-form-label">Spike prevalence</label>
-                    <select class="form-control col-sm-8" class = "spike_prevalence" name="EEG_epi_s[1][spike_prevalence]">
+                <label for="spike_prevalence" class="col-sm-2 col-form-label">Spike prevalence</label>
+                    <select class="form-control col-sm-7" class = "spike_prevalence" name="EEG_epi_s[1][spike_prevalence]">
                         <option>continuous</option>
                         <option>every few seconds</option>
                         <option>every few minutes</option>
                         <option>rare</option>
                     </select>
+                <label for="spike_prevalence_score" class="col-sm-2 col-form-label">Spike prevalence score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_epi_score[1][spike_prevalence]">
+                </div>
             </div>
             <div class="form-group row">
-                <label for="spike_modifier" class="col-sm-3 col-form-label">Spike modifier</label>
-                    <select class="form-control col-sm-8" class = "spike_modifier" name="EEG_epi_s[1][spike_modifier]">
+                <label for="spike_modifier" class="col-sm-2 col-form-label">Spike modifier</label>
+                    <select class="form-control col-sm-7" class = "spike_modifier" name="EEG_epi_s[1][spike_modifier]">
                         <option>with stimulation</option>
                         <option>periodic</option>
                         <option>low amplitude</option>
@@ -305,8 +361,11 @@
                         <option>triphasic</option>
                         <option>sleep augmented</option>
                     </select>
+                <label for="spike_modifier_score" class="col-sm-2 col-form-label">Spike modifier score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_epi_score[1][spike_modifier]">
+                </div>
             </div>
-            <br>
             </fieldset>
             <button id="addMoreSpike">Add another spike</button>
             <br>
@@ -315,8 +374,8 @@
         <section>
             <h3>Overall Assessment</h3>
         <div class="form-group row">
-            <label for="abn_summary" class="col-sm-3 col-form-label">Overall assessment</label>
-                <select class="form-control col-sm-8" id="abn_summary" name="EEG_Interpretation_s[abn_summary]">
+            <label for="abn_summary" class="col-sm-2 col-form-label">Overall assessment</label>
+                <select class="form-control col-sm-7" id="abn_summary" name="EEG_interpretation_s[abn_summary]">
                     <option>excessive beta likely reflecting a medication effect</option>
                     <option>focal slowing</option>
                     <option>multifocal slowing</option>
@@ -329,11 +388,15 @@
                     <option>fragmented sleep</option>
                     <option>hypoxia (low SpO2)</option>
                 </select>
+                <label for="abn_summary_score" class="col-sm-2 col-form-label">Overall assessment score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_interpretation_score[abn_summary]">
+                </div>
         </div>
         
         <div class="form-group row">
-            <label for="interpretation" class="col-sm-3 col-form-label">Interpretation</label>
-                <select class="form-control col-sm-8" id="interpretation" name="EEG_Interpretation_s[interpretation]">
+            <label for="interpretation" class="col-sm-2 col-form-label">Interpretation</label>
+                <select class="form-control col-sm-7" id="interpretation" name="EEG_interpretation_s[interpretation]">
                     <option>indicate diffuse encephalopathy</option>
                     <option>indicate cortical dysfunction</option>
                     <option>indicate cortical irritability</option>
@@ -342,9 +405,13 @@
                     <option>suggest NES</option>
                     <option>may indicate a sleep disorder</option>
                 </select>
+                <label for="interpretation_score" class="col-sm-2 col-form-label">Interpretation score</label>
+                <div class="col-sm-1">
+                    <input class="form-control" type="number" min=0 name="EEG_interpretation_score[interpretation]">
+                </div>
         </div>
         </section>
-        <input type="submit" class="btn btn-info" name="submit" value="create_eeg">
+        <input type="submit" class="btn btn-info" name="create_eeg" value="Create EEG">
         </form>
     </div>
 
@@ -360,7 +427,7 @@
             $("#addMoreSpike").click(function(e) {
                 e.preventDefault();
                 spike_count++;
-                $("fieldset:last").after("<p class='spike'>Spike "+ spike_count + "</p><fieldset><div class='form-group row'><label for='spike_lateralization' class='col-sm-3 col-form-label'>Spike lateralization</label><select class='form-control col-sm-8' class = 'spike_lateralization' name='EEG_epi_s["+ spike_count +"][spike_lateralization]'>option>bilateral R>L</option><option>bilateral L>R</option><option>left</option><option>right</option><option>vertex</option><option>bilateral L=R</option></select></div><div class='form-group row'><label for='spike_localization' class='col-sm-3 col-form-label'>Spike localization</label><select class='form-control col-sm-8' class = 'spike_localization' name='EEG_epi_s["+ spike_count +"][spike_localization]'><option>generalized</option><option>frontal</option><option>temporal</option><option>parietal</option><option>occipital</option><option>central</option></select></div><div class='form-group row'><label for='spike_prevalence' class='col-sm-3 col-form-label'>Spike prevalence</label><select class='form-control col-sm-8' class = 'spike_prevalence' name='EEG_epi_s["+ spike_count +"][spike_prevalence]'><option>continuous</option><option>every few seconds</option><option>every few minutes</option><option>rare</option></select></div><div class='form-group row'><label for='spike_modifier' class='col-sm-3 col-form-label'>Spike modifier</label><select class='form-control col-sm-8' class = 'spike_modifier' name='EEG_epi_s["+ spike_count +"][spike_modifier]'><option>with stimulation</option><option>periodic</option><option>low amplitude</option><option>high amplitude</option><option>polyspike</option><option>triphasic</option><option>sleep augmented</option></select></div><br></fieldset>");
+                $("fieldset:last").after("<p class='spike'>Spike "+ spike_count +"</p><fieldset> <div class='form-group row'> <label for='spike_lateralization' class='col-sm-2 col-form-label'>Spike lateralization</label> <select class='form-control col-sm-7' class='spike_lateralization' name='EEG_epi_s["+ spike_count +"][spike_lateralization]'> <option>bilateral R>L</option> <option>bilateral L>R</option> <option>left</option> <option>right</option> <option>vertex</option> <option>bilateral L=R</option> </select> <label for='spike_lateralization_score' class='col-sm-2 col-form-label'>Spike lateralization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_lateralization]'> </div> </div> <div class='form-group row'> <label for='spike_localization' class='col-sm-2 col-form-label'>Spike localization</label> <select class='form-control col-sm-7' class = 'spike_localization' name='EEG_epi_s["+ spike_count +"][spike_localization]'> <option>generalized</option> <option>frontal</option> <option>temporal</option> <option>parietal</option> <option>occipital</option> <option>central</option> </select> <label for='spike_localization_score' class='col-sm-2 col-form-label'>Spike localization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_localization]'> </div> </div> <div class='form-group row'> <label for='spike_prevalence' class='col-sm-2 col-form-label'>Spike prevalence</label> <select class='form-control col-sm-7' class = 'spike_prevalence' name='EEG_epi_s["+ spike_count +"][spike_prevalence]'> <option>continuous</option> <option>every few seconds</option> <option>every few minutes</option> <option>rare</option> </select> <label for='spike_prevalence_score' class='col-sm-2 col-form-label'>Spike prevalence score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_prevalence]'> </div> </div> <div class='form-group row'> <label for='spike_modifier' class='col-sm-2 col-form-label'>Spike modifier</label> <select class='form-control col-sm-7' class = 'spike_modifier' name='EEG_epi_s["+ spike_count +"][spike_modifier]'> <option>with stimulation</option> <option>periodic</option> <option>low amplitude</option> <option>high amplitude</option> <option>polyspike</option> <option>triphasic</option> <option>sleep augmented</option> </select> <label for='spike_modifier_score' class='col-sm-2 col-form-label'>Spike modifier score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_modifier]'> </div> </div> </fieldset>");
             });
         });
     </script>

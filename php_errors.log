@@ -3,3 +3,5 @@
 [13-Jan-2018 21:43:18 UTC] PHP Parse error:  syntax error, unexpected '"'"' (T_CONSTANT_ENCAPSED_STRING) in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 45
 [13-Jan-2018 23:23:29 UTC] PHP Parse error:  syntax error, unexpected '}' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 109
 [13-Jan-2018 23:28:58 UTC] PHP Parse error:  syntax error, unexpected '=' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 104
+[14-Jan-2018 21:25:26 UTC] PHP Parse error:  syntax error, unexpected 'echo' (T_ECHO), expecting ',' or ';' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 24
+[14-Jan-2018 21:25:34 UTC] PHP Parse error:  syntax error, unexpected 'echo' (T_ECHO), expecting ',' or ';' in /home/ubuntu/workspace/small_scale/create_eeg_s.php on line 28
