@@ -215,3 +215,10 @@
 [16-Jan-2018 04:24:43 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
 [16-Jan-2018 04:24:43 UTC] PHP   2. lookup_int_value() /home/ubuntu/workspace/small_scale/report_eeg_s.php:39
 [16-Jan-2018 04:24:43 UTC] PHP   3. mysqli_query() /home/ubuntu/workspace/small_scale/report_eeg_s.php:30
+[18-Jan-2018 03:09:06 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 95
+[18-Jan-2018 03:09:06 UTC] PHP Stack trace:
+[18-Jan-2018 03:09:06 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[18-Jan-2018 03:09:06 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 95
+[18-Jan-2018 03:09:06 UTC] PHP Stack trace:
+[18-Jan-2018 03:09:06 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[18-Jan-2018 03:13:47 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 105
