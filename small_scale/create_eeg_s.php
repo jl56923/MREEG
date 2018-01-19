@@ -18,8 +18,17 @@
             height: 100%;
         }
         
+        .radio-inline {
+            margin-left: 20px;
+        }
+        
         .btn {
-            margin: 20px;
+            margin:10px auto;
+            display:block;
+        }
+        
+        #create_eeg {
+            margin-bottom: 20px;
         }
         
         #EEG-display {
@@ -68,10 +77,6 @@
     
     <div class="container-fluid col-md-12" id="EEG-interpretation">
         <h1>EEG Interpretation</h1>
-        
-        <div id="message"><?php 
-        echo $message;
-        ?></div>
         
         <form action="report_eeg_s.php" method="post" id="EEG_interpretation_form">
         <section>
@@ -148,8 +153,12 @@
         
         <section>
             <h3>Spikes/epileptiform findings</h3>
-            <p class="spike">Spike 1</p>
-            <fieldset>
+            <br>
+            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_absent" id="spike_absent" onclick="check_spike()"> No spikes or epileptiform discharges present </label>
+            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_present" id="spike_present" onclick="check_spike()"> Spike(s) or epileptiform discharge(s) present </label>
+            <br>
+            <fieldset class="spike" style="display:none">
+            <h4>Spike 1</h4>
             <div class="form-group row">
                 <label for="spike_lateralization" class="col-sm-2 col-form-label">Spike lateralization</label>
                     <select class="form-control col-sm-7" class="spike_lateralization" name="EEG_epi_s[1][spike_lateralization]">
@@ -210,8 +219,9 @@
                 </div>
             </div>
             </fieldset>
-            <button id="addMoreSpike">Add another spike</button>
-            <br>
+            <div class="flex-center spike">
+                <button id="addMoreSpike" class="btn btn-info spike" style="display:none">Add another spike</button>
+            </div>
         </section>
         <br>
         <section>
@@ -254,7 +264,7 @@
                 </div>
         </div>
         </section>
-        <input type="submit" class="btn btn-info" name="create_eeg" value="Create EEG">
+        <input type="submit" class="btn btn-info" name="create_eeg" value="Create EEG" id="create_eeg">
         </form>
     </div>
 
@@ -265,12 +275,21 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
     
     <script>
+        function check_spike() {
+            if (document.getElementById('spike_present').checked) {
+                $(".spike").css('display', 'block');
+            }
+            else $(".spike").css('display', 'none');
+        }
+    </script>
+    
+    <script>
         $(function() {
             var spike_count = 1;
             $("#addMoreSpike").click(function(e) {
                 e.preventDefault();
                 spike_count++;
-                $("fieldset:last").after("<p class='spike'>Spike "+ spike_count +"</p><fieldset> <div class='form-group row'> <label for='spike_lateralization' class='col-sm-2 col-form-label'>Spike lateralization</label> <select class='form-control col-sm-7' class='spike_lateralization' name='EEG_epi_s["+ spike_count +"][spike_lateralization]'> <option>bilateral R>L</option> <option>bilateral L>R</option> <option>left</option> <option>right</option> <option>vertex</option> <option>bilateral L=R</option> </select> <label for='spike_lateralization_score' class='col-sm-2 col-form-label'>Spike lateralization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_lateralization]'> </div> </div> <div class='form-group row'> <label for='spike_localization' class='col-sm-2 col-form-label'>Spike localization</label> <select class='form-control col-sm-7' class = 'spike_localization' name='EEG_epi_s["+ spike_count +"][spike_localization]'> <option>generalized</option> <option>frontal</option> <option>temporal</option> <option>parietal</option> <option>occipital</option> <option>central</option> </select> <label for='spike_localization_score' class='col-sm-2 col-form-label'>Spike localization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_localization]'> </div> </div> <div class='form-group row'> <label for='spike_prevalence' class='col-sm-2 col-form-label'>Spike prevalence</label> <select class='form-control col-sm-7' class = 'spike_prevalence' name='EEG_epi_s["+ spike_count +"][spike_prevalence]'> <option>continuous</option> <option>every few seconds</option> <option>every few minutes</option> <option>rare</option> </select> <label for='spike_prevalence_score' class='col-sm-2 col-form-label'>Spike prevalence score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_prevalence]'> </div> </div> <div class='form-group row'> <label for='spike_modifier' class='col-sm-2 col-form-label'>Spike modifier</label> <select class='form-control col-sm-7' class = 'spike_modifier' name='EEG_epi_s["+ spike_count +"][spike_modifier]'> <option>with stimulation</option> <option>periodic</option> <option>low amplitude</option> <option>high amplitude</option> <option>polyspike</option> <option>triphasic</option> <option>sleep augmented</option> </select> <label for='spike_modifier_score' class='col-sm-2 col-form-label'>Spike modifier score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_modifier]'> </div> </div> </fieldset>");
+                $("fieldset:last").after("<fieldset class='spike' style='display:block'> <h4>Spike "+ spike_count +"</h4> <div class='flex-center'> <button id='removeSpike' class='btn btn-danger'>Remove spike</button> </div><div class='form-group row'> <label for='spike_lateralization' class='col-sm-2 col-form-label'>Spike lateralization</label> <select class='form-control col-sm-7' class='spike_lateralization' name='EEG_epi_s["+ spike_count +"][spike_lateralization]'> <option>bilateral R>L</option> <option>bilateral L>R</option> <option>left</option> <option>right</option> <option>vertex</option> <option>bilateral L=R</option> </select> <label for='spike_lateralization_score' class='col-sm-2 col-form-label'>Spike lateralization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_lateralization]'> </div> </div> <div class='form-group row'> <label for='spike_localization' class='col-sm-2 col-form-label'>Spike localization</label> <select class='form-control col-sm-7' class = 'spike_localization' name='EEG_epi_s["+ spike_count +"][spike_localization]'> <option>generalized</option> <option>frontal</option> <option>temporal</option> <option>parietal</option> <option>occipital</option> <option>central</option> </select> <label for='spike_localization_score' class='col-sm-2 col-form-label'>Spike localization score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_localization]'> </div> </div> <div class='form-group row'> <label for='spike_prevalence' class='col-sm-2 col-form-label'>Spike prevalence</label> <select class='form-control col-sm-7' class = 'spike_prevalence' name='EEG_epi_s["+ spike_count +"][spike_prevalence]'> <option>continuous</option> <option>every few seconds</option> <option>every few minutes</option> <option>rare</option> </select> <label for='spike_prevalence_score' class='col-sm-2 col-form-label'>Spike prevalence score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_prevalence]'> </div> </div> <div class='form-group row'> <label for='spike_modifier' class='col-sm-2 col-form-label'>Spike modifier</label> <select class='form-control col-sm-7' class = 'spike_modifier' name='EEG_epi_s["+ spike_count +"][spike_modifier]'> <option>with stimulation</option> <option>periodic</option> <option>low amplitude</option> <option>high amplitude</option> <option>polyspike</option> <option>triphasic</option> <option>sleep augmented</option> </select> <label for='spike_modifier_score' class='col-sm-2 col-form-label'>Spike modifier score</label> <div class='col-sm-1'> <input class='form-control' type='number' min=0 name='EEG_epi_score["+ spike_count +"][spike_modifier]'> </div> </div> </fieldset>");
             });
         });
     </script>
