@@ -222,3 +222,11 @@
 [18-Jan-2018 03:09:06 UTC] PHP Stack trace:
 [18-Jan-2018 03:09:06 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
 [18-Jan-2018 03:13:47 UTC] PHP Parse error:  syntax error, unexpected '<' in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 105
+[20-Jan-2018 04:00:20 UTC] PHP Warning:  array_values() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 111
+[20-Jan-2018 04:00:20 UTC] PHP Stack trace:
+[20-Jan-2018 04:00:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[20-Jan-2018 04:00:20 UTC] PHP   2. array_values() /home/ubuntu/workspace/small_scale/report_eeg_s.php:111
+[20-Jan-2018 04:00:20 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 111
+[20-Jan-2018 04:00:20 UTC] PHP Stack trace:
+[20-Jan-2018 04:00:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[20-Jan-2018 04:00:20 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/report_eeg_s.php:111

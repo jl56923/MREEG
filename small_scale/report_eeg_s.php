@@ -15,7 +15,7 @@
 
     if (array_key_exists("create_eeg", $_POST)) {
         
-        #print_r($_POST);
+        print_r($_POST);
         
         # You will have to distinguish between the $spike_count variable created here, when $_POST is submitted by create_eeg, vs $spike_count_user variable, which is when $_POST is submitted by read_eeg (that is, when a user reads an eeg and submits an interpretation).
         $spike_count = count($_POST['EEG_epi_s']);
@@ -180,6 +180,8 @@
         <p>EEG indications: <?php echo $_POST["EEG_interpretation_s"]["EEG_indications"]; ?></p> 
         <p>Current medications: <?php echo $_POST["EEG_interpretation_s"]["medications"]; ?></p>
         
+        <br>
+        
         <h3>EEG findings</h3>
         
         <table class="table">
@@ -213,6 +215,8 @@
             </tr>
           </tbody>
         </table>
+        
+        <br>
         
         <h3>Spikes/epileptiform findings</h3>
         <div id="spike_count">
