@@ -264,7 +264,7 @@
                 </div>
         </div>
         </section>
-        <input type="submit" class="btn btn-info" name="read_eeg" value="Read EEG" id="read_eeg">
+        <input type="submit" class="btn btn-info" name="create_eeg" value="Create EEG" id="create_eeg">
         </form>
     </div>
 
