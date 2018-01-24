@@ -5,22 +5,22 @@
     $db = "c9";
     $port = 3306;
     
+    $connection = mysqli_connect($host, $user, $pass, $db, $port)or die(mysql_error());
+    
     $message = "";
     
     $epi_table_html = "";
     $epi_table_header = "<table class='table'><thead><tr><th scope='col'>Parameter</th><th scope='col'>Value</th><th scope='col'>Score</th></tr></thead><tbody>";
     $epi_table_rows = [];
-    
-    $connection = mysqli_connect($host, $user, $pass, $db, $port)or die(mysql_error());
 
     if (array_key_exists("create_eeg", $_POST)) {
         
-        print_r($_POST);
+        #print_r($_POST);
         
         # You will have to distinguish between the $spike_count variable created here, when $_POST is submitted by create_eeg, vs $spike_count_user variable, which is when $_POST is submitted by read_eeg (that is, when a user reads an eeg and submits an interpretation).
         $spike_count = count($_POST['EEG_epi_s']);
         
-        $find_EEG_id = "SELECT MAX(EEG_unique_id) FROM EEG_interpretation_s WHERE user_ID=1";
+        $find_EEG_id = "SELECT MAX(EEG_unique_id) FROM EEG_interpretation_s WHERE user_ID=1 LIMIT 1";
         $eeg_unique_id = 0;
         $result = mysqli_query($connection, $find_EEG_id);
         if ($result && mysqli_num_rows($result) > 0) {
@@ -43,6 +43,7 @@
             }
         }
         
+        # Iterate through each subtable of the $_POST array in order to build appropriate queries to insert necessary data into the database for this EEG.
         foreach ($_POST as $table_name => $parameters) {
             if ($table_name === "EEG_interpretation_s") {
                 $query_interpretation = "INSERT INTO EEG_interpretation_s (EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
@@ -54,8 +55,8 @@
                 }
                 $query_interpretation .= ")";
                 mysqli_query($connection, $query_interpretation);
-                $message .= "The query to insert interpretation values is: ";
-                $message .= $query_interpretation."<br>";
+                #$message .= "The query to insert interpretation values is: ";
+                #$message .= $query_interpretation."<br>";
             }
             
             if ($table_name === "EEG_interpretation_score") {
@@ -65,11 +66,11 @@
                 $query_interpretation_score .= implode(", ", array_values($parameters));
                 $query_interpretation_score .= ")";
                 mysqli_query($connection, $query_interpretation_score);
-                $message .= "The query to insert interpretation scores is: ";
-                $message .= $query_interpretation_score."<br>";
+                #$message .= "The query to insert interpretation scores is: ";
+                #$message .= $query_interpretation_score."<br>";
             }
             
-            if ($table_name === "EEG_epi_s") {
+            if ($table_name === "EEG_epi_s" && $_POST['spike_present'] === "spike_present") {
                 foreach($_POST[$table_name] as $spike_num => $spike_parameters) {
                     $query_epi = "INSERT INTO EEG_epi_s (EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
                     $query_epi .= implode(", ", array_keys($spike_parameters));
@@ -81,12 +82,12 @@
                     }
                     $query_epi .= ")";
                     mysqli_query($connection, $query_epi);
-                    $message .= "The query to insert epi values is: ";
-                    $message .= $query_epi."<br>";
+                    #$message .= "The query to insert epi values is: ";
+                    #$message .= $query_epi."<br>";
                 }
             }
         
-            if ($table_name === "EEG_epi_score") {
+            if ($table_name === "EEG_epi_score" && $_POST['spike_present'] === "spike_present") {
                 foreach($_POST[$table_name] as $spike_num => $spike_parameters) {
                     $query_epi_score = "INSERT INTO EEG_epi_s (EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
                     $query_epi_score .= implode(", ", array_keys($spike_parameters));
@@ -97,19 +98,25 @@
                         $epi_table_rows[$spike_num][$spike_parameter_name] .= "<td>".$spike_parameter_score."</td></tr>";
                     }
                     mysqli_query($connection, $query_epi_score);
-                    $message .= "The query to insert epi values is: ";
-                    $message .= $query_epi_score."<br>";
+                    #$message .= "The query to insert epi score values is: ";
+                    #$message .= $query_epi_score."<br>";
                 }
+            } else {
+                #$message .= "There is no query to insert epi score values because there are no spikes.";
             }
         }
         
-        echo "<pre>".print_r($epi_table_rows, true)."</pre>";
+        #echo "<pre>".print_r($epi_table_rows, true)."</pre>";
         
-        for ($i = 1; $i <= $spike_count; $i++) {
-            $epi_table_html .= "<br><h4>Spike ".$i."</h4>";
-            $epi_table_html .= $epi_table_header;
-            $epi_table_html .= implode("", array_values($epi_table_rows[$i]));
-            $epi_table_html .= "</tbody></table>";
+        if ($_POST['spike_present'] === 'spike_present') {
+            for ($i = 1; $i <= $spike_count; $i++) {
+                $epi_table_html .= "<br><h4>Spike ".$i."</h4>";
+                $epi_table_html .= $epi_table_header;
+                $epi_table_html .= implode("", array_values($epi_table_rows[$i]));
+                $epi_table_html .= "</tbody></table>";
+            }    
+        } else {
+            $epi_table_html .= "There are no spikes/epileptiform discharges in this EEG.";
         }
     }
     

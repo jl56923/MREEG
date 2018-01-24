@@ -27,7 +27,7 @@
             display:block;
         }
         
-        #create_eeg {
+        #read_eeg {
             margin-bottom: 20px;
         }
         
@@ -125,7 +125,7 @@
             <!-- Could do radio buttons instead of select multiple from a list as well. If you are going to allow the user to select multiple values, will have to figure out how to enter these as a multivalued field. Will plan to use implode/explode to store multiple values as a comma delimited string. -->
             <div class="form-group row">
                 <label for="normal_variants" class="col-sm-2 col-form-label">Normal variants</label>
-                    <select multiple class="form-control col-sm-7" id="normal_variants" name="EEG_interpretation_s[normal_variants]" required>
+                    <select class="form-control col-sm-7" id="normal_variants" name="EEG_interpretation_s[normal_variants]" required>
                         <option>none applicable</option>
                         <option>rhythmic midtemporal theta of drowsiness (RMTD)</option>
                         <option>POSTS</option>
@@ -154,8 +154,8 @@
         <section>
             <h3>Spikes/epileptiform findings</h3>
             <br>
-            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_absent" id="spike_absent" onclick="check_spike()"> No spikes or epileptiform discharges present </label>
-            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_present" id="spike_present" onclick="check_spike()"> Spike(s) or epileptiform discharge(s) present </label>
+            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_absent" id="spike_absent" onclick="check_spike()" checked required> No spikes or epileptiform discharges present </label>
+            <label class="radio-inline"><input type="radio" name="spike_present" value="spike_present" id="spike_present" onclick="check_spike()" required> Spike(s) or epileptiform discharge(s) present </label>
             <br>
             <fieldset id = "spike1" class="spike" style="display:none">
             <h4 class="spike_title">Spike 1</h4>
@@ -264,7 +264,7 @@
                 </div>
         </div>
         </section>
-        <input type="submit" class="btn btn-info" name="create_eeg" value="Create EEG" id="create_eeg">
+        <input type="submit" class="btn btn-info" name="read_eeg" value="Read EEG" id="read_eeg">
         </form>
     </div>
 
@@ -300,45 +300,23 @@
                //$(this).closest("fieldset").remove();
                var remove_spike_id = $(this).closest("fieldset").prop("id");
                $("#"+remove_spike_id).remove();
-               //console.log(spike_count);
                
                $("fieldset").each(function(index) {
                    $(this).attr("id", "spike"+(index+1));
-                   console.log($(this).prop("id"));
                });
                
                $(".spike_title").each(function(index) {
                   $(this).text("Spike " + (index+1)); 
                });
                
-               $(".spike_lateralization").each(function(index) {
-                   $(this).attr("name", "EEG_epi_s["+(index+1)+"][spike_lateralization]");
+               $.each(["spike_lateralization", "spike_localization", "spike_prevalence", "spike_modifier"], function(index, parameter_name) {
+                   $("."+parameter_name).each(function(i) {
+                       $(this).attr("name", "EEG_epi_s["+(i+1)+"]["+parameter_name+"]"); 
+                   });
+                   $("."+parameter_name+"_score").each(function(i) {
+                      $(this).attr("name", "EEG_epi_score["+(i+1)+"]["+parameter_name+"]"); 
+                   });
                });
-               $(".spike_lateralization_score").each(function(index) {
-                   $(this).attr("name", "EEG_epi_score["+(index+1)+"][spike_lateralization]");
-               });
-               
-               $(".spike_localization").each(function(index) {
-                   $(this).attr("name", "EEG_epi_s["+(index+1)+"][spike_localization]");
-               });
-               $(".spike_localization_score").each(function(index) {
-                   $(this).attr("name", "EEG_epi_score["+(index+1)+"][spike_localization]");
-               });
-               
-               $(".spike_prevalence").each(function(index) {
-                   $(this).attr("name", "EEG_epi_s["+(index+1)+"][spike_prevalence]");
-               });
-               $(".spike_prevalence_score").each(function(index) {
-                   $(this).attr("name", "EEG_epi_score["+(index+1)+"][spike_prevalence]");
-               });
-               
-               $(".spike_modifier").each(function(index) {
-                   $(this).attr("name", "EEG_epi_s["+(index+1)+"][spike_modifier]");
-               });
-               $(".spike_modifier_score").each(function(index) {
-                   $(this).attr("name", "EEG_epi_score["+(index+1)+"][spike_modifier]");
-               });
-
                
             });
             
