@@ -27,10 +27,6 @@
             display:block;
         }
         
-        #create_eeg {
-            margin-bottom: 20px;
-        }
-        
         #EEG-display {
             background-color: lavender;
             float: left;
@@ -78,13 +74,13 @@
     <div class="container-fluid col-md-12" id="EEG-interpretation">
         <h1>EEG Interpretation</h1>
         <div id="message"></div>
-        <form action="report_eeg_s.php" method="post" id="EEG_interpretation_form">
+        <form action="score_eeg_s.php" method="post" id="EEG_interpretation_form">
         <section>
             <h3>Background information</h3>
             <div class="form-group row">
                 <label for="EEG_unique_id" class="col-sm-3 col-form-label">EEG number</label>
                 <div class="col-sm-8">
-                    <select class="form-control" type="text" id="EEG_unique_id">
+                    <select class="form-control" type="text" id="EEG_unique_id" name="EEG_unique_id">
                     </select>
                 </div>
                 <!--This will have to be read from the database at some point; basically, the page is going to have to keep track of which EEG the person is interpreting, and then fetch the EEG # and also the clinical history, etc. from the database which stores all th einfo about each EEG. -->
@@ -266,7 +262,7 @@
             $("#addMoreSpike").click(function(e) {
                 e.preventDefault();
                 spike_count++;
-                console.log(spike_count);
+
                 $("fieldset:last").after("<fieldset id = 'spike"+spike_count+"' class='spike' style='display:block'> <h4 class='spike_title'>Spike "+spike_count+"</h4> <div class='flex-center'> <button class='removeSpike btn btn-danger'>Remove spike</button> </div> <div class='form-group row'> <label class='col-sm-3 col-form-label'>Spike lateralization</label> <select class='form-control col-sm-8 spike_lateralization' name='EEG_epi_s["+ spike_count +"][spike_lateralization]'> <option>bilateral R>L</option> <option>bilateral L>R</option> <option>left</option> <option>right</option> <option>vertex</option> <option>bilateral L=R</option> </select> </div> <div class='form-group row'> <label class='col-sm-3 col-form-label'>Spike localization</label> <select class='form-control col-sm-8 spike_localization' name='EEG_epi_s["+ spike_count +"][spike_localization]'> <option>generalized</option> <option>frontal</option> <option>temporal</option> <option>parietal</option> <option>occipital</option> <option>central</option> </select> </div> <div class='form-group row'> <label class='col-sm-3 col-form-label'>Spike prevalence</label> <select class='form-control col-sm-8 spike_prevalence' name='EEG_epi_s["+ spike_count +"][spike_prevalence]'> <option>continuous</option> <option>every few seconds</option> <option>every few minutes</option> <option>rare</option> </select> </div> <div class='form-group row'> <label class='col-sm-3 col-form-label'>Spike modifier</label> <select class='form-control col-sm-8 spike_modifier' name='EEG_epi_s["+ spike_count +"][spike_modifier]'> <option>with stimulation</option> <option>periodic</option> <option>low amplitude</option> <option>high amplitude</option> <option>polyspike</option> <option>triphasic</option> <option>sleep augmented</option> </select> </div> </fieldset>");
             });
             

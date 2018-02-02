@@ -239,3 +239,23 @@
 [23-Jan-2018 21:01:06 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
 [23-Jan-2018 21:01:06 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/report_eeg_s.php:124
 [24-Jan-2018 18:21:57 UTC] PHP Parse error:  syntax error, unexpected '$message' (T_VARIABLE) in /home/ubuntu/workspace/small_scale/load_eeg_background_meds.php on line 21
+[30-Jan-2018 02:59:44 UTC] PHP Warning:  mysqli_fetch_array() expects parameter 1 to be mysqli_result, boolean given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 52
+[30-Jan-2018 02:59:44 UTC] PHP Stack trace:
+[30-Jan-2018 02:59:44 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[30-Jan-2018 02:59:44 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:52
+[30-Jan-2018 03:03:26 UTC] PHP Warning:  mysqli_fetch_array() expects parameter 1 to be mysqli_result, boolean given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 52
+[30-Jan-2018 03:03:26 UTC] PHP Stack trace:
+[30-Jan-2018 03:03:26 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[30-Jan-2018 03:03:26 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:52
+[30-Jan-2018 03:06:34 UTC] PHP Warning:  mysqli_fetch_array() expects parameter 1 to be mysqli_result, boolean given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 52
+[30-Jan-2018 03:06:34 UTC] PHP Stack trace:
+[30-Jan-2018 03:06:34 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[30-Jan-2018 03:06:34 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:52
+[30-Jan-2018 03:06:48 UTC] PHP Warning:  mysqli_fetch_array() expects parameter 1 to be mysqli_result, boolean given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 52
+[30-Jan-2018 03:06:48 UTC] PHP Stack trace:
+[30-Jan-2018 03:06:48 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[30-Jan-2018 03:06:48 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:52
+[30-Jan-2018 03:13:52 UTC] PHP Warning:  mysqli_fetch_array() expects parameter 1 to be mysqli_result, boolean given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 53
+[30-Jan-2018 03:13:52 UTC] PHP Stack trace:
+[30-Jan-2018 03:13:52 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[30-Jan-2018 03:13:52 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:53
