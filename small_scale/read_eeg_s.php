@@ -124,7 +124,7 @@
             <!-- Could do radio buttons instead of select multiple from a list as well. If you are going to allow the user to select multiple values, will have to figure out how to enter these as a multivalued field. Will plan to use implode/explode to store multiple values as a comma delimited string. -->
             <div class="form-group row">
                 <label for="normal_variants" class="col-sm-3 col-form-label">Normal variants</label>
-                    <select class="form-control col-sm-8" id="normal_variants" name="EEG_interpretation_s[normal_variants]" required>
+                    <select class="form-control col-sm-8" id="normal_variants" name="EEG_interpretation_s[normal_variants][]" multiple required>
                         <option>none applicable</option>
                         <option>rhythmic midtemporal theta of drowsiness (RMTD)</option>
                         <option>POSTS</option>

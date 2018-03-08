@@ -67,13 +67,24 @@
                 $query_interpretation .= implode(", ", array_keys($parameters));
                 $query_interpretation .= ") VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ".$spike_count;
                 foreach ($parameters as $parameter_name => $parameter_value) {
-                    $query_interpretation .= ", ";
-                    $query_interpretation .= lookup_int_value($parameter_name, $parameter_value, $connection);
+                    if ($parameter_name === 'normal_variants') {
+                        $normal_variant_array = [];
+                        foreach($parameter_value as $normal_variant_value) {
+                            $normal_variant_array[] = lookup_int_value('normal_variants', $normal_variant_value, $connection);
+                        }
+                        print_r($normal_variant_array);
+                        $normal_variant_string = "'".implode(",", $normal_variant_array)."'";
+                        $query_interpretation .= ", ".$normal_variant_string;
+                        $message .= "The normal_variant_string is: ".$normal_variant_string."<br>";
+                    } else {
+                        $query_interpretation .= ", ";
+                        $query_interpretation .= lookup_int_value($parameter_name, $parameter_value, $connection);
+                    }
                 }
                 $query_interpretation .= ")";
                 mysqli_query($connection, $query_interpretation);
-                #$message .= "The query to insert interpretation values is: ";
-                #$message .= $query_interpretation."<br>";
+                $message .= "The query to insert interpretation values is: ";
+                $message .= $query_interpretation."<br>";
             }
             
             if ($table_name === "EEG_interpretation_score") {
@@ -83,8 +94,8 @@
                 $query_interpretation_score .= implode(", ", array_values($parameters));
                 $query_interpretation_score .= ")";
                 mysqli_query($connection, $query_interpretation_score);
-                #$message .= "The query to insert interpretation scores is: ";
-                #$message .= $query_interpretation_score."<br>";
+                $message .= "The query to insert interpretation scores is: ";
+                $message .= $query_interpretation_score."<br>";
             }
             
             if ($table_name === "EEG_epi_s" && $_POST['spike_present'] === "spike_present") {

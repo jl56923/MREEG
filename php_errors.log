@@ -259,3 +259,21 @@
 [30-Jan-2018 03:13:52 UTC] PHP Stack trace:
 [30-Jan-2018 03:13:52 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
 [30-Jan-2018 03:13:52 UTC] PHP   2. mysqli_fetch_array() /home/ubuntu/workspace/small_scale/score_eeg_s.php:53
+[07-Mar-2018 00:26:39 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 70
+[07-Mar-2018 00:26:39 UTC] PHP Stack trace:
+[07-Mar-2018 00:26:39 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[07-Mar-2018 00:43:03 UTC] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 63
+[08-Mar-2018 02:07:38 UTC] PHP Parse error:  syntax error, unexpected '}' in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 152
+[08-Mar-2018 06:53:54 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 350
+[08-Mar-2018 06:53:54 UTC] PHP Stack trace:
+[08-Mar-2018 06:53:54 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[08-Mar-2018 06:53:54 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:350
+[08-Mar-2018 07:19:06 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 72
+[08-Mar-2018 07:19:06 UTC] PHP Stack trace:
+[08-Mar-2018 07:19:06 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[08-Mar-2018 07:21:36 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 72
+[08-Mar-2018 07:21:36 UTC] PHP Stack trace:
+[08-Mar-2018 07:21:36 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[08-Mar-2018 07:23:09 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 72
+[08-Mar-2018 07:23:09 UTC] PHP Stack trace:
+[08-Mar-2018 07:23:09 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
