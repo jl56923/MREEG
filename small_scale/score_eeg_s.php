@@ -14,17 +14,15 @@
 
     if (array_key_exists("read_eeg", $_POST)) {
         
-        print_r($_POST);
+        #print_r($_POST);
         
-        # You will have to distinguish between the $spike_count variable created here, when $_POST is submitted by create_eeg, vs $spike_count_user variable, which is when $_POST is submitted by read_eeg (that is, when a user reads an eeg and submits an interpretation).
+        $EEG_unique_id = $_POST['EEG_unique_id'];
+        
         if ($_POST['spike_present'] === 'spike_absent') {
             $user_spike_count = 0;
         } else {
             $user_spike_count = count($_POST['EEG_epi_s']);
         }
-        
-        # The steps here should be: 1) Look up answer key for the EEG that the user just read and store it in a string, 2) Look up the scoring template for the EEG that the user just read and store it in a string, 3) compare the parameters that the user entered and the answer key, 4) after comparing the user's interpretation and the answer key, generate a score for the user's interpretation. (For spikes, seizures, and slowing, this is going to requiring iterating through each sub-entry and comparing each of the user's sub-entry with the key's sub-entries, and matching them up to maximize the user's score.) 5) Insert the user's score into the database, with the parameter values now representing how many points the user got for that specific parameter. I'm not actually sure if this really would save time, because in reality you can always recalculate the user's score based on their entry and the answer key, but whatever.
-        $EEG_unique_id = $_POST['EEG_unique_id'];
         
         function lookup_text_value($parameter_name, $parameter_value, $connection) {
             $query_lookup_text_value = "SELECT parameter_text_value FROM values_dictionary WHERE parameter_name='".$parameter_name."' AND parameter_int_value='".$parameter_value."' LIMIT 1";
@@ -37,37 +35,89 @@
             }
         }
         
-        $relevant_EEG_parameters = "pdr_value, normal_variants, abn_summary, interpretation, spikes";
+        function lookup_int_value($parameter_name, $parameter_value, $connection) {
+            $query_lookup_int_value = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$parameter_name."' AND parameter_text_value='".$parameter_value."' LIMIT 1";
+            $result = mysqli_query($connection, $query_lookup_int_value);
+            if ($result && mysqli_num_rows($result) > 0) {
+                $row = mysqli_fetch_array($result);
+                return $row['parameter_int_value'];
+            } else {
+                return $parameter_value;
+            }
+        }
         
-        $retrieve_EEG_key = "SELECT ".$relevant_EEG_parameters." FROM EEG_interpretation_s WHERE EEG_unique_id=".$EEG_unique_id." AND user_ID = 1 AND scoring_template=0 LIMIT 1";
+        $relevant_EEG_parameters = ['pdr_value', 'normal_variants', 'abn_summary', 'interpretation', 'spikes'];
+        $relevant_EEG_parameters_string = implode(", ", $relevant_EEG_parameters);
+        
+        // Retrieve the EEG key for this specific EEG. Query returns int values, so convert this to text values for display to the users. The EEG key retrieved directly from the database returns as $EEG_key, and the normal_variants comma-delimited string is exploded to return an array. The EEG key is converted to the text values using the function lookup_text_value, and this is stored as $EEG_key_text.
+        $retrieve_EEG_key = "SELECT ".$relevant_EEG_parameters_string." FROM EEG_interpretation_s WHERE EEG_unique_id=".$EEG_unique_id." AND user_ID = 1 AND scoring_template=0 LIMIT 1";
         $result = mysqli_query($connection, $retrieve_EEG_key);
         $EEG_key = mysqli_fetch_array($result);
+        $EEG_key_text = [];
         foreach ($EEG_key as $parameter_name => $parameter_value) {
             if ($parameter_name === 'normal_variants') {
                 $normal_variant_string = $parameter_value;
                 $normal_variant_array = explode(",", $normal_variant_string);
+                $EEG_key['normal_variants'] = $normal_variant_array;
                 foreach($normal_variant_array as $index => $normal_variant_int_value) {
                     $normal_variant_array[$index] = lookup_text_value('normal_variants', $normal_variant_int_value, $connection);
                 }
-                $EEG_key['normal_variants'] = $normal_variant_array;
+                $EEG_key_text['normal_variants'] = $normal_variant_array;
             } else {
-                $EEG_key[$parameter_name] = lookup_text_value($parameter_name, $parameter_value, $connection);
+                $EEG_key_text[$parameter_name] = lookup_text_value($parameter_name, $parameter_value, $connection);
             }
         }
         
         // Have to cast key_spike_count as an int, otherwise it retrieves it from the database as a string. This is important later when calculating $max_spike_count.
         $key_spike_count = intval($EEG_key['spikes']);
         
-        $retrieve_EEG_scoring_template = "SELECT ".$relevant_EEG_parameters." FROM EEG_interpretation_s WHERE EEG_unique_id=".$EEG_unique_id." AND user_ID = 1 AND scoring_template=1 LIMIT 1";
+        // Retrieve the scoring template for this specific EEG.
+        $retrieve_EEG_scoring_template = "SELECT ".$relevant_EEG_parameters_string." FROM EEG_interpretation_s WHERE EEG_unique_id=".$EEG_unique_id." AND user_ID = 1 AND scoring_template=1 LIMIT 1";
         $result = mysqli_query($connection, $retrieve_EEG_scoring_template);
         $EEG_scoring_template = mysqli_fetch_array($result);
         
-        $message .= "The values for this EEG are: ";
-        $message .= "<pre>".print_r($EEG_key, true)."</pre>";
-        $message .= "The scoring template for this EEG are: ";
-        $message .= "<pre>".print_r($EEG_scoring_template, true)."</pre>";
+        // Now, convert the $_POST array into the int values, 1) so that you can compare the int values to the key's int values, and 2) so that you can prepare to build the queries to insert the user's answers into the database.
+        $EEG_user_int = [];
+        foreach ($relevant_EEG_parameters as $parameter_name) {
+            if ($parameter_name === 'normal_variants') {
+                $normal_variant_array = $_POST['EEG_interpretation_s']['normal_variants'];
+                foreach ($normal_variant_array as $index => $normal_variant_value) {
+                    $normal_variant_array[$index] = lookup_int_value('normal_variants', $normal_variant_value, $connection);
+                }
+                $normal_variant_string = implode(",", $normal_variant_array);
+                $EEG_user_int[$parameter_name] = "'".$normal_variant_string."'";
+                $EEG_user_int['normal_variant_int_array'] = $normal_variant_array;
+            } else if ($parameter_name === 'spikes') {
+                $EEG_user_int[$parameter_name] = $user_spike_count;
+            } else {
+                $EEG_user_int[$parameter_name] = lookup_int_value($parameter_name, $_POST['EEG_interpretation_s'][$parameter_name], $connection);
+            }
+        }
+        $query_user_interpretation = "INSERT INTO EEG_interpretation_s (EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, ";
+        $query_user_interpretation .= implode(", ", $relevant_EEG_parameters);
+        $query_user_interpretation .= ") VALUES ('NULL', ".$EEG_unique_id.", 2, 0, ";
+        $query_user_interpretation .= implode(", ", $EEG_user_int);
+        $query_user_interpretation .= ")";
         
+        // Scoring for normal EEG parameters. Unset the 'spikes' element because you don't need to use it for scoring the normal EEG parameters. Once you implement the full-fledged version, you will also unset the 'seizures' element. Unset deletes an element from an array.
+        $unset_spikes = array_search('spikes', $relevant_EEG_parameters);
+        unset($relevant_EEG_parameters[$unset_spikes]);
+        
+        $score_EEG_parameters = [];
+        foreach($relevant_EEG_parameters as $parameter_name) {
+            if ($parameter_name === 'normal_variants') {
+                $nv_common = array_intersect($EEG_user_int['normal_variant_int_array'], $EEG_key['normal_variants']);
+                $score_EEG_parameters[$parameter_name] = count($nv_common)/max(count($EEG_key['normal_variants']), count($EEG_user_int['normal_variant_int_array'])) * $EEG_scoring_template[$parameter_name];
+            } else if ($EEG_key_text[$parameter_name] === $_POST['EEG_interpretation_s'][$parameter_name]) {
+                $score_EEG_parameters[$parameter_name] = 1 * $EEG_scoring_template[$parameter_name];
+            } else {
+                $score_EEG_parameters[$parameter_name] = 0;
+            }
+        }
+        
+        // Retrieve the spikes parameter values and also scoring template from the database. These are retrieved as ints.
         if ($key_spike_count > 0) {
+            $relevant_epi_parameters_array = ['EEG_epi_id', 'spike_lateralization', 'spike_localization', 'spike_prevalence', 'spike_modifier'];
             $relevant_epi_parameters = "EEG_epi_id, spike_lateralization, spike_localization, spike_prevalence, spike_modifier";
             
             $retrieve_EEG_epi_key = "SELECT ".$relevant_epi_parameters." FROM EEG_epi_s WHERE EEG_unique_id=".$EEG_unique_id." AND user_ID = 1 AND scoring_template=0 LIMIT ".$key_spike_count;
@@ -76,8 +126,10 @@
             while ($row = mysqli_fetch_array($result)) {
                 $EEG_epi_key[] = $row;
             }
+            // $message .= "<p>The EEG_epi_key is: ";
+            // $message .= "<pre>".print_r($EEG_epi_key, true)."</pre></p>";
             
-            // turn epi/spikes into text.
+            // Turn epi/spikes into text. The retrieval of the key creates an array indexed from 0, but converting $EEG_epi_text to start indexing its array from 1 makes building the necessary html easier.
             $EEG_epi_text = [];
             foreach ($EEG_epi_key as $spike => $parameters) {
                 foreach($parameters as $parameter_name => $parameter_value) {
@@ -91,19 +143,128 @@
             while ($row = mysqli_fetch_array($result)) {
                 $EEG_epi_scoring_template[] = $row;
             }
-            $message .= "The values for the epi findings for this EEG are: ";
-            $message .= "<pre>".print_r($EEG_epi_key, true)."</pre>";
-            $message .= "The text version for the epi findings for this EEG are: ";
-            $message .= "<pre>".print_r($EEG_epi_text, true)."</pre>";
-            $message .= "The scoring template for the epi findings for this EEG are: ";
-            $message .= "<pre>".print_r($EEG_epi_scoring_template, true)."</pre>";
-        } else {
-            $message .= "<p>The key for this EEG states that there are no spikes or epileptiform findings.</p>";
+            // $message .= "<p>The EEG_epi_scoring_template is: ";
+            // $message .= "<pre>".print_r($EEG_epi_scoring_template, true)."</pre></p>";
         }
         
+        // Now, convert the user's spikes/epileptiform text values into int values, since you will be comparing the int values in order to generate a score.
+        if ($user_spike_count > 0) {
+            $epi_user_int = [];
+            foreach ($_POST['EEG_epi_s'] as $spike => $parameters) {
+                foreach($parameters as $parameter_name => $parameter_value) {
+                    $epi_user_int[$spike][$parameter_name] = lookup_int_value($parameter_name, $parameter_value, $connection);
+                }
+            }
+            
+            // This loop is going to have to get moved to after the scores for the spikes are calculated.
+            for ($i = 1; $i <= $user_spike_count; $i++) {
+                $query_user_epi = "INSERT INTO EEG_epi_s (EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
+                $query_user_epi .= implode(", ", array_keys($epi_user_int[$i]));
+                $query_user_epi .= ") VALUES ('NULL', ".$EEG_unique_id.", 2, 0, ";
+                $query_user_epi .= implode(", ", $epi_user_int[$i]);
+                $query_user_epi .= ")";
+                //$message .= "<p>The query to insert the values for the user-entered spike is: ".$query_user_epi."</p>";
+            }
+        }
+        
+        // Scoring spikes/epileptiform discharges:
+        // Scenario 1: User enters zero spikes or epileptiform discharges.
+        // Structure of $spike_scores: $spike_scores[spike_num] -> array of [key_spike_index => int, parameters_matched => int between 0 and 4, epi_score => the total number of points that the user gets for this spike, based on how many parameters matched.]
+        $spike_scores = [];
+        
+        if ($user_spike_count === 0) {
+            if ($key_spike_count === 0) {
+                $spike_scores[1][score] = 0;
+            } else for ($i = 1; $i <= $key_spike_count; $i++) {
+                $spike_scores[$i][score] = 0;
+            }
+        }
+        // Scenario 2: User_spike is at least 1; if the user has entered at least one spike, then it goes here.
+        // At this point, you should check to see if there are any key spikes, because if there are 0 key spikes then you are just going to set the spike scores to some predefined penalty.
+            // if ($key_spike_count === 0) {
+            //     foreach ($spike_scores as $spike_num => $array) {
+            //         $spike_scores[$spike_num]['score'] = -5; // here, you are setting the score to a default of -5, but you need to figure out what the actual penalty is going to be.
+            //     }
+            // }
+        else {
+            $copy_epi_user_int = $epi_user_int;
+            $copy_EEG_epi_key = $EEG_epi_key;
+            
+            for ($i = 1; $i <= $user_spike_count; $i++) {
+                $spike_scores[$i]['key_index'] = -1; // you set the default key index to 1 when you initialize the spike_scores array, because none of the user spikes have been compared to any of the key spikes. In reality, this probably should be set to the actual key_index, it should probably be EEG_epi_id, pulled from EEG_epi_key? Or at least, at some point you're going to have to match EEG_epi_id so that you can pull the scoring template for the matching EEG_epi_id.
+                $spike_scores[$i]['matched_parameters'] = [];
+                $spike_scores[$i]['score'] = 0;
+            }
+            
+            // This is a for loop where you count down the number of parameters that match, and during each iteration you compare each user_spike to each key_spike and see how many match. Then, at the end once you've gone through all the spikes, you store the ones that match the max_match (which is initially defined as the total number of relevant epi parameters minus 1), and reset all the other spikes for the next iteration of the loop.
+            // You also need to reference the $EEG_epi_scoring_template in order to calculate the score for each spike that the user entered. Both $EEG_epi_key and $EEG_epi_scoring template contain the $EEG_epi_id, which is how you're going to figure out which row in $EEG_epi_scoring_template actually contains the correct score.
+            $used_key_indexes = [];
+            for ($max_match = count($relevant_epi_parameters_array) - 1; $max_match > 0; $max_match--) {
+                $message .= "Max_match is now: ";
+                $message .= $max_match;
+                
+                foreach($copy_epi_user_int as $user_spike_index => $user_parameters) {
+                    foreach($copy_EEG_epi_key as $key_spike_index => $key_parameters) {
+                        
+                        $temp_array = [];
+                        foreach($key_parameters as $parameter_name => $parameter_value) {
+                            if ($parameter_name != 'EEG_epi_id') {
+                                // Check to see if the values of each parameter match up between the specific user_spike and key_spike that we're checking right now:
+                                if ($copy_epi_user_int[$user_spike_index][$parameter_name] === $copy_EEG_epi_key[$key_spike_index][$parameter_name]) {
+                                    $temp_array[] = $parameter_name;
+                                }
+                            }
+                        }
+                        
+                        $message .= "<p>Comparing user spike #".$user_spike_index." and key spike #".$key_spike_index.", the parameters that match are: ";
+                        $message .= "<pre>".print_r($temp_array, true)."</pre></p>";
+                        // Now, check to see how many matched parameters there are in $temp_array. If count($temp_array) > count($spike_scores[$user_spike_index]['matched_parameters']), then you set $temp array equal to $spike_scores[$user_spike_index]['matched_parameters'] and you also set $spike_scores[$user_spike_index]['key_index'] = $key_spike_index, because this new $key_spike that you just found is better than what was stored previously.
+                        // You could have a check here to make sure that $temp_array *includes* laterality, because if you could make an argument that if the laterality doesn't match, then even if the other three spike parameters match, then you shouldn't give any credit. Can bring that up to discuss.
+                        if (count($temp_array) > count($spike_scores[$user_spike_index]['matched_parameters'])) {
+                            $message .= "<p>This pair has ".count($temp_array)." parameters that match, compared to the best prior pair where ".count($spike_scores[$user_spike_index]['matched_parameters'])." parameters matched.</p>";
+                            $spike_scores[$user_spike_index]['matched_parameters'] = $temp_array;
+                            $spike_scores[$user_spike_index]['key_index'] = $key_spike_index;
+                            $spike_scores[$user_spike_index]['score'] = count($temp_array);
+                        }
+                    }
+                }
+                
+                // $message .= "<p>This is the iteration of spike_scores BEFORE resetting: ";
+                // $message .= "<pre>".print_r($spike_scores, true)."</pre></p>";
+                
+                // Here, once each user spike has been compared against each key spike, you check to see if count['matched_parameters'] equals $max_match, which initially starts out at 4 (all parameters match). If the user spike does have max_match, then you remove both the user and the key spike from the array.
+                
+                foreach($spike_scores as $user_spike_index => $spike_score) {
+                    
+                    if (count($spike_scores[$user_spike_index]['matched_parameters']) === $max_match && !in_array($spike_scores[$user_spike_index]['key_index'], $used_key_indexes)) {
+                        $linked_key_spike_index = $spike_scores[$user_spike_index]['key_index'];
+                        $used_key_indexes[] = $linked_key_spike_index;
+                        $spike_scores[$user_spike_index]['EEG_epi_id'] = $copy_EEG_epi_key[$linked_key_spike_index]['EEG_epi_id'];
+                        unset($copy_epi_user_int[$user_spike_index]);
+                        unset($copy_EEG_epi_key[$linked_key_spike_index]);
+                    }
+                    // For this else if, you have to check both conditions because you want to reset all the user spikes that *didn't* meet the max_match parameters (where the number of matched parameters was less then the max_match), but you also want to make sure that any spikes that *did* meet the max_match but were not caught in the first if loop prior to this are again reset so that they can participate in matching again.
+                    //else if (count($spike_scores[$user_spike_index]['matched_parameters']) < $max_match || in_array($spike_scores[$user_spike_index]['key_index'], $used_key_indexes)) {
+                    else if (count($spike_scores[$user_spike_index]['matched_parameters']) < $max_match || (count($spike_scores[$user_spike_index]['matched_parameters']) === $max_match && in_array($spike_scores[$user_spike_index]['key_index'], $used_key_indexes))) {
+                        $spike_scores[$user_spike_index]['key_index'] = -1;
+                        $spike_scores[$user_spike_index]['matched_parameters'] = [];
+                        $spike_scores[$user_spike_index]['score'] = 0;
+                    }
+                }
+                
+                // $message .= "<p>Copy_epi_user_int is now: ";
+                // $message .= "<pre>".print_r($copy_epi_user_int, true)."</pre></p>";
+                // $message .= "<p>Copy_EEG_epi_key is now: ";
+                // $message .= "<pre>".print_r($copy_EEG_epi_key, true)."</pre></p>";
+                
+                // $message .= "<p>This is the iteration of spike_scores AFTER resetting: ";
+                // $message .= "<pre>".print_r($spike_scores, true)."</pre></p>";
+                // $message .= "<hr>";
+            }
+        }
+
         // Section to populate the epi html section:
         $max_spike_count = max($key_spike_count, $user_spike_count);
-        $epi_html .= $epi_html_header;
         
         // If both $key_spike_count and $user_spike_count are 0, then you need to populate the $padded_user_epi_array and $padded_key_epi_array with the same value, which is: 'You did not enter any spikes/epileptiform findings for this EEG.', or 'There are no spikes/epileptiform findings for this EEG.'
         $padded_key_epi_array = [];
@@ -111,7 +272,6 @@
         if ($max_spike_count === 0) {
             $padded_user_epi_array[1] = "<p>You did not enter any spikes/epileptiform findings for this EEG.</p>";
             $padded_key_epi_array[1] = "<p>There are no spikes/epileptiform findings for this EEG.</p>";
-            var_dump($key_spike_count);
         } else {
             // First, copy over the user's answers over into another padded array; this padded array is used to generate the html needed for the first column of 'Your findings.'
             //$padded_user_epi_array = [];
@@ -157,9 +317,8 @@
                 }
             }
         }
-        //print_r($padded_user_epi_array);
-        //print_r($padded_key_epi_array);
         
+        $epi_html .= $epi_html_header;
         for ($i = 1; $i <= count($padded_key_epi_array); $i++) {
             $epi_html .= "<hr><div class='row'>";
             $epi_html .= "<div class='col-sm'>".$padded_user_epi_array[$i]."</div>";
@@ -167,122 +326,8 @@
             $epi_html .= "<div class='col-sm'><p>Score: </p></div>";
             $epi_html .= "</div>";
         }
-        
         $epi_html .= "</div><br>";
-        
     }
-    // This is the code coped from report_eeg that created the queries to insert the parameter values into the database. You need to adapt this so that it now inserts the parameter values that the *user* entered; since you have to cycle through all of the parameters that the user entered, you also use this in order to build the necessary html to display the actual real answers, at least for the spikes/epileptiform findings. The other parameters you've already individually displayed in the html directly.
-    
-    
-    
-    /* 
-    if (array_key_exists("create_eeg", $_POST)) {   
-        $find_EEG_id = "SELECT MAX(EEG_unique_id) FROM EEG_interpretation_s WHERE user_ID=1 LIMIT 1";
-        $eeg_unique_id = 0;
-        $result = mysqli_query($connection, $find_EEG_id);
-        if ($result && mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_array($result);
-            if (is_null($row['MAX(EEG_unique_id)'])) {
-                $eeg_unique_id = 1;
-            } else {
-                $eeg_unique_id = $row['MAX(EEG_unique_id)'] + 1;
-            }
-        }
-        
-        function lookup_text_value($parameter_name, $parameter_value, $connection) {
-            $query_lookup_text_value = "SELECT parameter_text_value FROM values_dictionary WHERE parameter_name='".$parameter_name."' AND parameter_int_value='".$parameter_value."' LIMIT 1";
-            $result = mysqli_query($connection, $query_lookup_text_value);
-            $row = mysqli_fetch_array($result);
-            return $row['parameter_text_value'];
-        }
-        
-        function lookup_int_value($parameter_name, $parameter_value, $connection) {
-            $query_lookup_int_value = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$parameter_name."' AND parameter_text_value='".$parameter_value."' LIMIT 1";
-            $result = mysqli_query($connection, $query_lookup_int_value);
-            if ($result && mysqli_num_rows($result) > 0) {
-                $row = mysqli_fetch_array($result);
-                return $row['parameter_int_value'];
-            } else {
-                return "'".htmlspecialchars($parameter_value)."'";
-            }
-        }
-        
-        # Iterate through each subtable of the $_POST array in order to build appropriate queries to insert necessary data into the database for this EEG.
-        foreach ($_POST as $table_name => $parameters) {
-            if ($table_name === "EEG_interpretation_s") {
-                $query_interpretation = "INSERT INTO EEG_interpretation_s (EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
-                $query_interpretation .= implode(", ", array_keys($parameters));
-                $query_interpretation .= ") VALUES ('NULL', ".$eeg_unique_id.", 1, 0, ".$spike_count;
-                foreach ($parameters as $parameter_name => $parameter_value) {
-                    $query_interpretation .= ", ";
-                    $query_interpretation .= lookup_int_value($parameter_name, $parameter_value, $connection);
-                }
-                $query_interpretation .= ")";
-                mysqli_query($connection, $query_interpretation);
-                #$message .= "The query to insert interpretation values is: ";
-                #$message .= $query_interpretation."<br>";
-            }
-            
-            if ($table_name === "EEG_interpretation_score") {
-                $query_interpretation_score = "INSERT INTO EEG_interpretation_s (EEG_interpretation_row, EEG_unique_id, user_ID, scoring_template, spikes, ";
-                $query_interpretation_score .= implode(", ", array_keys($parameters));
-                $query_interpretation_score .= ") VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ".$spike_count.", ";
-                $query_interpretation_score .= implode(", ", array_values($parameters));
-                $query_interpretation_score .= ")";
-                mysqli_query($connection, $query_interpretation_score);
-                #$message .= "The query to insert interpretation scores is: ";
-                #$message .= $query_interpretation_score."<br>";
-            }
-            
-            if ($table_name === "EEG_epi_s" && $_POST['spike_present'] === "spike_present") {
-                foreach($_POST[$table_name] as $spike_num => $spike_parameters) {
-                    $query_epi = "INSERT INTO EEG_epi_s (EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
-                    $query_epi .= implode(", ", array_keys($spike_parameters));
-                    $query_epi .= ") VALUES ('NULL', ".$eeg_unique_id.", 1, 0";
-                    foreach($spike_parameters as $spike_parameter_name => $spike_parameter_value) {
-                        $query_epi .= ", ";
-                        $query_epi .= lookup_int_value($spike_parameter_name, $spike_parameter_value, $connection);
-                        $epi_table_rows[$spike_num][$spike_parameter_name] = "<tr><th scope='row'>".$spike_parameter_name."</th><td>".$spike_parameter_value."</td>";
-                    }
-                    $query_epi .= ")";
-                    mysqli_query($connection, $query_epi);
-                    #$message .= "The query to insert epi values is: ";
-                    #$message .= $query_epi."<br>";
-                }
-            }
-        
-            if ($table_name === "EEG_epi_score" && $_POST['spike_present'] === "spike_present") {
-                foreach($_POST[$table_name] as $spike_num => $spike_parameters) {
-                    $query_epi_score = "INSERT INTO EEG_epi_s (EEG_epi_row, EEG_unique_id, user_ID, scoring_template, ";
-                    $query_epi_score .= implode(", ", array_keys($spike_parameters));
-                    $query_epi_score .= ") VALUES ('NULL', ".$eeg_unique_id.", 1, 1, ";
-                    $query_epi_score .= implode(", ", array_values($spike_parameters));
-                    $query_epi_score .= ")";
-                    foreach ($spike_parameters as $spike_parameter_name => $spike_parameter_score) {
-                        $epi_table_rows[$spike_num][$spike_parameter_name] .= "<td>".$spike_parameter_score."</td></tr>";
-                    }
-                    mysqli_query($connection, $query_epi_score);
-                    #$message .= "The query to insert epi score values is: ";
-                    #$message .= $query_epi_score."<br>";
-                }
-            } else {
-                #$message .= "There is no query to insert epi score values because there are no spikes.";
-            }
-        }
-        
-        #echo "<pre>".print_r($epi_table_rows, true)."</pre>";
-        
-        if ($_POST['spike_present'] === 'spike_present') {
-            for ($i = 1; $i <= $spike_count; $i++) {
-                $epi_table_html .= "<br><h4>Spike ".$i."</h4>";
-                $epi_table_html .= $epi_table_header;
-                $epi_table_html .= implode("", array_values($epi_table_rows[$i]));
-                $epi_table_html .= "</tbody></table>";
-            }    
-        } else {
-            $epi_table_html .= "There are no spikes/epileptiform discharges in this EEG.";
-        }
-    }*/
     
 ?>
 
@@ -351,13 +396,13 @@
             <h3>EEG findings</h3>
             <h5>PDR value</h5>
             <p>Your answer: <?php echo $_POST['EEG_interpretation_s']['pdr_value'] ?></p>
-            <p>Correct answer: <?php echo $EEG_key['pdr_value'] ?></p>
-            <p>Score: /<?php echo $EEG_scoring_template['pdr_value'] ?></p>
+            <p>Correct answer: <?php echo $EEG_key_text['pdr_value'] ?></p>
+            <p>Score: <?php echo $score_EEG_parameters['pdr_value'] ?>/<?php echo $EEG_scoring_template['pdr_value'] ?></p>
             
             <h5>Normal variants</h5>
             <p>Your answer: <?php echo implode(", ", $_POST['EEG_interpretation_s']['normal_variants']); ?></p>
-            <p>Correct answer: <?php echo implode(", ", $EEG_key['normal_variants']); ?></p>
-            <p>Score: /<?php echo $EEG_scoring_template['normal_variants'] ?></p>
+            <p>Correct answer: <?php echo implode(", ", $EEG_key_text['normal_variants']); ?></p>
+            <p>Score: <?php if (is_int($score_EEG_parameters['normal_variants'])) { echo $score_EEG_parameters['normal_variants']; } else { echo number_format($score_EEG_parameters, 2); } ?>/<?php echo $EEG_scoring_template['normal_variants'] ?></p>
         </div>
         
         <div id="spikes">
@@ -367,15 +412,16 @@
 
         <div id="Overall assessment">
             <h3>Overall Assessment</h3>
+            <br>
             <h5>Overall Assessment</h5>
             <p>Your answer: <?php echo $_POST['EEG_interpretation_s']['abn_summary'] ?></p>
-            <p>Correct answer: <?php echo $EEG_key['abn_summary'] ?></p>
-            <p>Score: /<?php echo $EEG_scoring_template['abn_summary'] ?></p>
+            <p>Correct answer: <?php echo $EEG_key_text['abn_summary'] ?></p>
+            <p>Score: <?php echo $score_EEG_parameters['abn_summary'] ?>/<?php echo $EEG_scoring_template['abn_summary'] ?></p>
             <br>
             <h5>Interpretation</h5>
             <p>Your answer: <?php echo $_POST['EEG_interpretation_s']['interpretation'] ?></p>
-            <p>Correct answer: <?php echo $EEG_key['interpretation'] ?></p>
-            <p>Score: /<?php echo $EEG_scoring_template['interpretation'] ?></p>
+            <p>Correct answer: <?php echo $EEG_key_text['interpretation'] ?></p>
+            <p>Score: <?php echo $score_EEG_parameters['interpretation'] ?>/<?php echo $EEG_scoring_template['interpretation'] ?></p>
         </div>
     
     <form action="read_eeg_s.php">

@@ -48,7 +48,7 @@
             }
         }
 
-        
+        # If there is no lookup int value in the dictionary for the specific parameter name, then you assume that this is one of the parameters that has a string value, e.g. 'Medications' or 'Indications'. Since the $_POST array has string values for these keys/parameters, you return the string WITH SINGLE QUOTATION MARKS AROUND IT so that this string value can be successfully inserted into the database.
         function lookup_int_value($parameter_name, $parameter_value, $connection) {
             $query_lookup_int_value = "SELECT parameter_int_value FROM values_dictionary WHERE parameter_name='".$parameter_name."' AND parameter_text_value='".$parameter_value."' LIMIT 1";
             $result = mysqli_query($connection, $query_lookup_int_value);
@@ -233,7 +233,7 @@
             </tr>
             <tr>
               <th scope="row">Normal variants</th>
-              <td><?php echo $_POST["EEG_interpretation_s"]["normal_variants"]; ?></td>
+              <td><?php echo implode(", ", $_POST['EEG_interpretation_s']['normal_variants']); ?></td>
               <td><?php echo $_POST["EEG_interpretation_score"]["normal_variants"]; ?></td>
             </tr>
             <tr>

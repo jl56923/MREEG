@@ -277,3 +277,35 @@
 [08-Mar-2018 07:23:09 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/report_eeg_s.php on line 72
 [08-Mar-2018 07:23:09 UTC] PHP Stack trace:
 [08-Mar-2018 07:23:09 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/report_eeg_s.php:0
+[09-Mar-2018 02:33:20 UTC] PHP Warning:  explode() expects parameter 2 to be string, array given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 87
+[09-Mar-2018 02:33:20 UTC] PHP Stack trace:
+[09-Mar-2018 02:33:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 02:33:20 UTC] PHP   2. explode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:87
+[09-Mar-2018 02:35:20 UTC] PHP Warning:  explode() expects parameter 2 to be string, array given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 88
+[09-Mar-2018 02:35:20 UTC] PHP Stack trace:
+[09-Mar-2018 02:35:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 02:35:20 UTC] PHP   2. explode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:88
+[09-Mar-2018 02:36:24 UTC] PHP Warning:  explode() expects parameter 2 to be string, array given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 89
+[09-Mar-2018 02:36:24 UTC] PHP Stack trace:
+[09-Mar-2018 02:36:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 02:36:24 UTC] PHP   2. explode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:89
+[09-Mar-2018 06:48:28 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 433
+[09-Mar-2018 06:48:28 UTC] PHP Stack trace:
+[09-Mar-2018 06:48:28 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 06:48:28 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:433
+[09-Mar-2018 06:48:28 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 434
+[09-Mar-2018 06:48:28 UTC] PHP Stack trace:
+[09-Mar-2018 06:48:28 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 06:48:28 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:434
+[09-Mar-2018 06:48:47 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 432
+[09-Mar-2018 06:48:47 UTC] PHP Stack trace:
+[09-Mar-2018 06:48:47 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 06:48:47 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:432
+[09-Mar-2018 06:48:47 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 433
+[09-Mar-2018 06:48:47 UTC] PHP Stack trace:
+[09-Mar-2018 06:48:47 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[09-Mar-2018 06:48:47 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:433
+[12-Mar-2018 01:19:10 UTC] PHP Parse error:  syntax error, unexpected '{' in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 342
+[12-Mar-2018 01:19:59 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ',' or ';' in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 346
+[12-Mar-2018 03:12:29 UTC] PHP Parse error:  syntax error, unexpected '"</p>"' (T_CONSTANT_ENCAPSED_STRING) in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 203
+[12-Mar-2018 03:14:57 UTC] PHP Parse error:  syntax error, unexpected ''spike_prevalence'' (T_CONSTANT_ENCAPSED_STRING), expecting ']' in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 119
