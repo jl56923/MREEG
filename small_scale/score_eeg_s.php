@@ -126,14 +126,14 @@
             while ($row = mysqli_fetch_array($result)) {
                 $EEG_epi_key[] = $row;
             }
-            // $message .= "<p>The EEG_epi_key is: ";
-            // $message .= "<pre>".print_r($EEG_epi_key, true)."</pre></p>";
-            
+            // You need to make the array for both $EEG_epi_key and $EEG_epi_scoring_template start counting from 1, because otherwise this gets really annoying and you can't use for loops that will iterate through both the user array and the key arrays synchronously; if one array starts indexing from 0 and the other array from 1, then it's asynchronous or you have to use subtraction to make the counter sync up, which is probably a worse solution.
+            array_unshift($EEG_epi_key, null);
+            unset($EEG_epi_key[0]);
             // Turn epi/spikes into text. The retrieval of the key creates an array indexed from 0, but converting $EEG_epi_text to start indexing its array from 1 makes building the necessary html easier.
             $EEG_epi_text = [];
             foreach ($EEG_epi_key as $spike => $parameters) {
                 foreach($parameters as $parameter_name => $parameter_value) {
-                    $EEG_epi_text[$spike+1][$parameter_name] = lookup_text_value($parameter_name, $parameter_value, $connection);
+                    $EEG_epi_text[$spike][$parameter_name] = lookup_text_value($parameter_name, $parameter_value, $connection);
                 }
             }
             
@@ -143,8 +143,8 @@
             while ($row = mysqli_fetch_array($result)) {
                 $EEG_epi_scoring_template[] = $row;
             }
-            // $message .= "<p>The EEG_epi_scoring_template is: ";
-            // $message .= "<pre>".print_r($EEG_epi_scoring_template, true)."</pre></p>";
+            array_unshift($EEG_epi_scoring_template, null);
+            unset($EEG_epi_scoring_template[0]);
         }
         
         // Now, convert the user's spikes/epileptiform text values into int values, since you will be comparing the int values in order to generate a score.
@@ -174,9 +174,13 @@
         
         if ($user_spike_count === 0) {
             if ($key_spike_count === 0) {
-                $spike_scores[1][score] = 0;
+                $spike_scores[1]['key_index'] = -1;
+                $spike_scores[1]['matched_parameters'] = [];
+                $spike_scores[1]['score'] = 0;
             } else for ($i = 1; $i <= $key_spike_count; $i++) {
-                $spike_scores[$i][score] = 0;
+                $spike_scores[$i]['key_index'] = -1;
+                $spike_scores[$i]['matched_parameters'] = [];
+                $spike_scores[$i]['score'] = 0;
             }
         }
         // Scenario 2: User_spike is at least 1; if the user has entered at least one spike, then it goes here.
@@ -197,11 +201,8 @@
             }
             
             // This is a for loop where you count down the number of parameters that match, and during each iteration you compare each user_spike to each key_spike and see how many match. Then, at the end once you've gone through all the spikes, you store the ones that match the max_match (which is initially defined as the total number of relevant epi parameters minus 1), and reset all the other spikes for the next iteration of the loop.
-            // You also need to reference the $EEG_epi_scoring_template in order to calculate the score for each spike that the user entered. Both $EEG_epi_key and $EEG_epi_scoring template contain the $EEG_epi_id, which is how you're going to figure out which row in $EEG_epi_scoring_template actually contains the correct score.
             $used_key_indexes = [];
             for ($max_match = count($relevant_epi_parameters_array) - 1; $max_match > 0; $max_match--) {
-                $message .= "Max_match is now: ";
-                $message .= $max_match;
                 
                 foreach($copy_epi_user_int as $user_spike_index => $user_parameters) {
                     foreach($copy_EEG_epi_key as $key_spike_index => $key_parameters) {
@@ -216,21 +217,17 @@
                             }
                         }
                         
-                        $message .= "<p>Comparing user spike #".$user_spike_index." and key spike #".$key_spike_index.", the parameters that match are: ";
-                        $message .= "<pre>".print_r($temp_array, true)."</pre></p>";
+                        // $message .= "<p>Comparing user spike #".$user_spike_index." and key spike #".$key_spike_index.", the parameters that match are: ";
+                        // $message .= "<pre>".print_r($temp_array, true)."</pre></p>";
                         // Now, check to see how many matched parameters there are in $temp_array. If count($temp_array) > count($spike_scores[$user_spike_index]['matched_parameters']), then you set $temp array equal to $spike_scores[$user_spike_index]['matched_parameters'] and you also set $spike_scores[$user_spike_index]['key_index'] = $key_spike_index, because this new $key_spike that you just found is better than what was stored previously.
                         // You could have a check here to make sure that $temp_array *includes* laterality, because if you could make an argument that if the laterality doesn't match, then even if the other three spike parameters match, then you shouldn't give any credit. Can bring that up to discuss.
                         if (count($temp_array) > count($spike_scores[$user_spike_index]['matched_parameters'])) {
-                            $message .= "<p>This pair has ".count($temp_array)." parameters that match, compared to the best prior pair where ".count($spike_scores[$user_spike_index]['matched_parameters'])." parameters matched.</p>";
+                            //$message .= "<p>This pair has ".count($temp_array)." parameters that match, compared to the best prior pair where ".count($spike_scores[$user_spike_index]['matched_parameters'])." parameters matched.</p>";
                             $spike_scores[$user_spike_index]['matched_parameters'] = $temp_array;
                             $spike_scores[$user_spike_index]['key_index'] = $key_spike_index;
-                            $spike_scores[$user_spike_index]['score'] = count($temp_array);
                         }
                     }
                 }
-                
-                // $message .= "<p>This is the iteration of spike_scores BEFORE resetting: ";
-                // $message .= "<pre>".print_r($spike_scores, true)."</pre></p>";
                 
                 // Here, once each user spike has been compared against each key spike, you check to see if count['matched_parameters'] equals $max_match, which initially starts out at 4 (all parameters match). If the user spike does have max_match, then you remove both the user and the key spike from the array.
                 
@@ -238,7 +235,7 @@
                     
                     if (count($spike_scores[$user_spike_index]['matched_parameters']) === $max_match && !in_array($spike_scores[$user_spike_index]['key_index'], $used_key_indexes)) {
                         $linked_key_spike_index = $spike_scores[$user_spike_index]['key_index'];
-                        $used_key_indexes[] = $linked_key_spike_index;
+                        $used_key_indexes[$user_spike_index] = $linked_key_spike_index;
                         $spike_scores[$user_spike_index]['EEG_epi_id'] = $copy_EEG_epi_key[$linked_key_spike_index]['EEG_epi_id'];
                         unset($copy_epi_user_int[$user_spike_index]);
                         unset($copy_EEG_epi_key[$linked_key_spike_index]);
@@ -251,72 +248,177 @@
                         $spike_scores[$user_spike_index]['score'] = 0;
                     }
                 }
-                
-                // $message .= "<p>Copy_epi_user_int is now: ";
-                // $message .= "<pre>".print_r($copy_epi_user_int, true)."</pre></p>";
-                // $message .= "<p>Copy_EEG_epi_key is now: ";
-                // $message .= "<pre>".print_r($copy_EEG_epi_key, true)."</pre></p>";
-                
-                // $message .= "<p>This is the iteration of spike_scores AFTER resetting: ";
-                // $message .= "<pre>".print_r($spike_scores, true)."</pre></p>";
-                // $message .= "<hr>";
             }
+            
+            // $message .= "<p>The final spike_scores array is: ";
+            // $message .= "<pre>".print_r($spike_scores, true)."</pre></p>";
+            
+            // $message .= "<p>Epi user int is: ";
+            // $message .= "<pre>".print_r($epi_user_int, true)."</pre></p>";
+            
+            // $message .= "<p>EEG epi key is: ";
+            // $message .= "<pre>".print_r($EEG_epi_key, true)."</pre></p>";
+            
+            // $message .= "<p>EEG epi key scoring template is: ";
+            // $message .= "<pre>".print_r($EEG_epi_scoring_template, true)."</pre></p>";
+            
+            // Now that you've matched all the user and key spikes as best possible, you need to calculate the scores associated with each matched user/key spike pair. You are going to store the score in the spike_score template.
+            foreach($spike_scores as $spike_num => $parameters) {
+                
+                // check to see if the spike has a key index of -1; if it does NOT, then that means it has been matched to a key spike.
+                if ($spike_scores[$spike_num]['key_index'] != -1) {
+                    // if the user spike has been matched with a key spike, then set the score to an empty array, because you are going to store which parameters matched and what the score is for getting each matched parameter correct.
+                    $spike_scores[$spike_num]['score'] = [];
+                    
+                    $EEG_epi_id = $spike_scores[$spike_num]['EEG_epi_id'];
+                    
+                    // Find the index of the element in EEG epi scoring template that matches the EEG epi id, and then cycle through that element's scoring template for each of the individual parameters.
+                    foreach($EEG_epi_scoring_template as $spike_index => $parameters) {
+                        if ($EEG_epi_scoring_template[$spike_index]['EEG_epi_id'] === $EEG_epi_id) {
+                            $scoring_template_index = $spike_index;
+                        }
+                    }
+                    
+                    // No, you actually want this array to contain all of the relevant epi parameters, and if the user does *not* have a matched parameter then they get zero.
+                    $unset_epi_id = array_search('EEG_epi_id', $relevant_epi_parameters_array);
+                    unset($relevant_epi_parameters_array[$unset_epi_id]);
+                    
+                    foreach($relevant_epi_parameters_array as $index => $parameter_name) {
+                        if (in_array($parameter_name, $spike_scores[$spike_num]['matched_parameters'])) {
+                            $spike_scores[$spike_num]['score'][$parameter_name] = $EEG_epi_scoring_template[$scoring_template_index][$parameter_name];
+                        } else {
+                            $spike_scores[$spike_num]['score'][$parameter_name] = 0;
+                        }
+                    }
+                    
+                }
+            }
+            
+            $message .= "<p style='color:blue;'>This is the updated spike scores array which includes the score for each matched spike: ";
+            $message .="<pre>".print_r($spike_scores, true)."</pre></p>";
+            
+            // Now that you've calculated the score for each matched user/spike pair, the next step is to *reorder* the user spikes so that they line up with the associated key spike, and then after that you append all of the unmatched user spikes to this reordered array. I'm not sure whether or not you're actually going to have to use the used_key_index array to keep track of how much padding you'll need? I don't think so, but let's see.
+            // I actually think that you don't have to re-order the actual spikes, I think that what you should do is use spike_scores to re-order padded_user_epi_array, since that's what is going to be displayed as html.
         }
 
         // Section to populate the epi html section:
-        $max_spike_count = max($key_spike_count, $user_spike_count);
+        // You actually are not going to use max_spike_count here; what you need is # of matched spikes + # unmatched user spikes + # unmatched key spikes.
+        $num_matched_spikes = count($used_key_indexes);
+        //$used_key_indexes actually contains all the user-key spike pairs.
+        $message .= "<p><pre>".print_r($used_key_indexes, true)."<pre></p>";
+        
+        $num_unmatched_user_spikes = count($copy_epi_user_int);
+        $unmatched_user_spikes = array_keys($copy_epi_user_int);
+        
+        $num_unmatched_key_spikes = count($copy_EEG_epi_key);
+        $unmatched_key_spikes = array_keys($copy_EEG_epi_key);
+        
+        $max_spike_count = $num_matched_spikes + $num_unmatched_user_spikes + $num_unmatched_key_spikes;
         
         // If both $key_spike_count and $user_spike_count are 0, then you need to populate the $padded_user_epi_array and $padded_key_epi_array with the same value, which is: 'You did not enter any spikes/epileptiform findings for this EEG.', or 'There are no spikes/epileptiform findings for this EEG.'
         $padded_key_epi_array = [];
         $padded_user_epi_array = [];
+        $padded_score_epi_array = [];
+        
         if ($max_spike_count === 0) {
             $padded_user_epi_array[1] = "<p>You did not enter any spikes/epileptiform findings for this EEG.</p>";
             $padded_key_epi_array[1] = "<p>There are no spikes/epileptiform findings for this EEG.</p>";
+            $padded_score_epi_array[1] = "<p>Total score: 0</p>";
         } else {
-            // First, copy over the user's answers over into another padded array; this padded array is used to generate the html needed for the first column of 'Your findings.'
-            //$padded_user_epi_array = [];
-            if ($user_spike_count === 0) {
-                for ($i = 1; $i <= $max_spike_count; $i++) {
-                    if ($i === 1) {
-                        $padded_user_epi_array[$i] = "<p>You did not enter any spikes/epileptiform findings for this EEG.</p>";
-                    } else {
-                        $padded_user_epi_array[$i] = "<p></p>";
-                    }
-                }
-            } else for ($i = 1; $i <= $max_spike_count; $i++) {
-                if ($i <= $user_spike_count) {
-                    $padded_user_epi_array[$i] = $_POST['EEG_epi_s'][$i];
-                    
-                    $padded_user_epi_array[$i] = "<p>Spike lateralization: ".$_POST['EEG_epi_s'][$i]['spike_lateralization']."</p>";
-                    $padded_user_epi_array[$i] .= "<p>Spike localization: ".$_POST['EEG_epi_s'][$i]['spike_localization']."</p>";
-                    $padded_user_epi_array[$i] .= "<p>Spike prevalence: ".$_POST['EEG_epi_s'][$i]['spike_prevalence']."</p>";
-                    $padded_user_epi_array[$i] .= "<p>Spike modifier: ".$_POST['EEG_epi_s'][$i]['spike_modifier']."</p>";
-                } else {
-                    $padded_user_epi_array[$i] = "<p></p>";
-                }
+            $i = 1;
+            // First, iterate through $used_key_indexes because this contains all of the matched user/key spikes.
+            foreach($used_key_indexes as $user_index => $key_index) {
+                $padded_user_epi_array[$i] = "<p>Spike lateralization: ".$_POST['EEG_epi_s'][$user_index]['spike_lateralization']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike localization: ".$_POST['EEG_epi_s'][$user_index]['spike_localization']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike prevalence: ".$_POST['EEG_epi_s'][$user_index]['spike_prevalence']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike modifier: ".$_POST['EEG_epi_s'][$user_index]['spike_modifier']."</p>";
+                
+                $padded_key_epi_array[$i] = "<p>Spike lateralization: ".$EEG_epi_text[$key_index]['spike_lateralization']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike localization: ".$EEG_epi_text[$key_index]['spike_localization']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike prevalence: ".$EEG_epi_text[$key_index]['spike_prevalence']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike modifier: ".$EEG_epi_text[$key_index]['spike_modifier']."</p>";
+                
+                $padded_score_epi_array[$i] = "<p>Score=</p>";
+                
+                $i++;
             }
             
-            // Second, copy over the key's answers into another padded array; this padded array is used to generate the html needed for the second column of 'Correct findings'.
-            //$padded_key_epi_array = [];
-            if ($key_spike_count === 0) {
-                for ($i = 1; $i <= $max_spike_count; $i++) {
-                    if ($i === 1) {
-                        $padded_key_epi_array[$i] = "<p>There are no spikes/epileptiform findings for this EEG.</p>";
-                    } else {
-                        $padded_key_epi_array[$i] = "<p></p>";
-                    }
-                }
-            } else for ($i = 1; $i <= $max_spike_count; $i++) {
-                if ($i <= $key_spike_count) {
-                    $padded_key_epi_array[$i] = "<p>Spike lateralization: ".$EEG_epi_text[$i]['spike_lateralization']."</p>";
-                    $padded_key_epi_array[$i] .= "<p>Spike localization: ".$EEG_epi_text[$i]['spike_localization']."</p>";
-                    $padded_key_epi_array[$i] .= "<p>Spike prevalence: ".$EEG_epi_text[$i]['spike_prevalence']."</p>";
-                    $padded_key_epi_array[$i] .= "<p>Spike modifier: ".$EEG_epi_text[$i]['spike_modifier']."</p>";
-                } else {
-                    $padded_key_epi_array[$i] = "<p></p>";
-                }
+            // Second, iterate through $unmatched_user_spikes to display the unmatched user spikes, and pad the key epi array with nothing.
+            foreach($unmatched_user_spikes as $index => $unused_user_index) {
+                $padded_user_epi_array[$i] = "<p>Spike lateralization: ".$_POST['EEG_epi_s'][$unused_user_index]['spike_lateralization']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike localization: ".$_POST['EEG_epi_s'][$unused_user_index]['spike_localization']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike prevalence: ".$_POST['EEG_epi_s'][$unused_user_index]['spike_prevalence']."</p>";
+                $padded_user_epi_array[$i] .= "<p>Spike modifier: ".$_POST['EEG_epi_s'][$unused_user_index]['spike_modifier']."</p>";
+                
+                $padded_key_epi_array[$i] = "<p></p>";
+                
+                $i++;
+            }
+            
+            // Third, iterate through $unmatched_key_spikes to display the unmatched key spikes, and pad the user epi array with nothing.
+            foreach($unmatched_key_spikes as $index => $unused_key_index) {
+                $padded_user_epi_array[$i] = "<p></p>";
+                
+                $padded_key_epi_array[$i] = "<p>Spike lateralization: ".$EEG_epi_text[$unused_key_index]['spike_lateralization']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike localization: ".$EEG_epi_text[$unused_key_index]['spike_localization']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike prevalence: ".$EEG_epi_text[$unused_key_index]['spike_prevalence']."</p>";
+                $padded_key_epi_array[$i] .= "<p>Spike modifier: ".$EEG_epi_text[$unused_key_index]['spike_modifier']."</p>";
+                
+                $i++;
             }
         }
+        
+        // if ($max_spike_count === 0) {
+        //     $padded_user_epi_array[1] = "<p>You did not enter any spikes/epileptiform findings for this EEG.</p>";
+        //     $padded_key_epi_array[1] = "<p>There are no spikes/epileptiform findings for this EEG.</p>";
+        //     $padded_score_epi_array[1] = "<p>Total score: 0</p>";
+        // } else {
+        //     // First, copy over the user's answers over into another padded array; this padded array is used to generate the html needed for the first column of 'Your findings.'
+        //     //$padded_user_epi_array = [];
+        //     if ($user_spike_count === 0) {
+        //         for ($i = 1; $i <= $max_spike_count; $i++) {
+        //             if ($i === 1) {
+        //                 $padded_user_epi_array[$i] = "<p>You did not enter any spikes/epileptiform findings for this EEG.</p>";
+        //             } else {
+        //                 $padded_user_epi_array[$i] = "<p></p>";
+        //             }
+        //         }
+        //     } else for ($i = 1; $i <= $max_spike_count; $i++) {
+        //         if ($i <= $user_spike_count) {
+        //             $padded_user_epi_array[$i] = $_POST['EEG_epi_s'][$i];
+                    
+        //             $padded_user_epi_array[$i] = "<p>Spike lateralization: ".$_POST['EEG_epi_s'][$i]['spike_lateralization']."</p>";
+        //             $padded_user_epi_array[$i] .= "<p>Spike localization: ".$_POST['EEG_epi_s'][$i]['spike_localization']."</p>";
+        //             $padded_user_epi_array[$i] .= "<p>Spike prevalence: ".$_POST['EEG_epi_s'][$i]['spike_prevalence']."</p>";
+        //             $padded_user_epi_array[$i] .= "<p>Spike modifier: ".$_POST['EEG_epi_s'][$i]['spike_modifier']."</p>";
+        //         } else {
+        //             $padded_user_epi_array[$i] = "<p></p>";
+        //         }
+        //     }
+            
+        //     // Second, copy over the key's answers into another padded array; this padded array is used to generate the html needed for the second column of 'Correct findings'.
+        //     //$padded_key_epi_array = [];
+        //     if ($key_spike_count === 0) {
+        //         for ($i = 1; $i <= $max_spike_count; $i++) {
+        //             if ($i === 1) {
+        //                 $padded_key_epi_array[$i] = "<p>There are no spikes/epileptiform findings for this EEG.</p>";
+        //             } else {
+        //                 $padded_key_epi_array[$i] = "<p></p>";
+        //             }
+        //         }
+        //     } else for ($i = 1; $i <= $max_spike_count; $i++) {
+        //         if ($i <= $key_spike_count) {
+        //             $padded_key_epi_array[$i] = "<p>Spike lateralization: ".$EEG_epi_text[$i]['spike_lateralization']."</p>";
+        //             $padded_key_epi_array[$i] .= "<p>Spike localization: ".$EEG_epi_text[$i]['spike_localization']."</p>";
+        //             $padded_key_epi_array[$i] .= "<p>Spike prevalence: ".$EEG_epi_text[$i]['spike_prevalence']."</p>";
+        //             $padded_key_epi_array[$i] .= "<p>Spike modifier: ".$EEG_epi_text[$i]['spike_modifier']."</p>";
+        //         } else {
+        //             $padded_key_epi_array[$i] = "<p></p>";
+        //         }
+        //     }
+            
+        //     //Okay, so actually what you need to do is build the padded user and epi arrays at the same time, and it's dependent on whether or not there is a match between a user and key spike. So instead of building padded_user_epi_array and then padded_key_epi_array, what you should actually do is 1) build both arrays for the matched user/spike pairs, 2) build the padded user array for the unmatched user spikes, and then 3) build the padded key array for the unmatched key spikes. So I think that actually what you have to do is go back and get the keys for both the unmatched user spikes and the unmatched key spikes.
+        // }
         
         $epi_html .= $epi_html_header;
         for ($i = 1; $i <= count($padded_key_epi_array); $i++) {
@@ -402,7 +504,7 @@
             <h5>Normal variants</h5>
             <p>Your answer: <?php echo implode(", ", $_POST['EEG_interpretation_s']['normal_variants']); ?></p>
             <p>Correct answer: <?php echo implode(", ", $EEG_key_text['normal_variants']); ?></p>
-            <p>Score: <?php if (is_int($score_EEG_parameters['normal_variants'])) { echo $score_EEG_parameters['normal_variants']; } else { echo number_format($score_EEG_parameters, 2); } ?>/<?php echo $EEG_scoring_template['normal_variants'] ?></p>
+            <p>Score: <?php if (is_int($score_EEG_parameters['normal_variants'])) { echo $score_EEG_parameters['normal_variants']; } else { echo number_format($score_EEG_parameters['normal_variants'], 2); } ?>/<?php echo $EEG_scoring_template['normal_variants'] ?></p>
         </div>
         
         <div id="spikes">
