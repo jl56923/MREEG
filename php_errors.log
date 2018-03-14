@@ -404,3 +404,166 @@
 [14-Mar-2018 16:27:26 UTC] PHP Stack trace:
 [14-Mar-2018 16:27:26 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
 [14-Mar-2018 16:27:26 UTC] PHP   2. number_format() /home/ubuntu/workspace/small_scale/score_eeg_s.php:450
+[14-Mar-2018 19:23:09 UTC] PHP Fatal error:  Call to undefined function sum() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 364
+[14-Mar-2018 19:23:09 UTC] PHP Stack trace:
+[14-Mar-2018 19:23:09 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 19:45:53 UTC] PHP Warning:  array_sum() expects parameter 1 to be array, integer given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 402
+[14-Mar-2018 19:45:53 UTC] PHP Stack trace:
+[14-Mar-2018 19:45:53 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 19:45:53 UTC] PHP   2. array_sum() /home/ubuntu/workspace/small_scale/score_eeg_s.php:402
+[14-Mar-2018 20:07:26 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 349
+[14-Mar-2018 20:07:26 UTC] PHP Stack trace:
+[14-Mar-2018 20:07:26 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 20:07:26 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 363
+[14-Mar-2018 20:07:26 UTC] PHP Stack trace:
+[14-Mar-2018 20:07:26 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  Cannot use a scalar value as an array in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 268
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, integer given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 311
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:311
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 311
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:311
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 313
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:313
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, integer given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 311
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:311
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 311
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:311
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 313
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:313
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  array_sum() expects parameter 1 to be array, integer given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 392
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. array_sum() /home/ubuntu/workspace/small_scale/score_eeg_s.php:392
+[14-Mar-2018 21:02:24 UTC] PHP Warning:  array_sum() expects parameter 1 to be array, integer given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 392
+[14-Mar-2018 21:02:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:02:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:02:24 UTC] PHP   2. array_sum() /home/ubuntu/workspace/small_scale/score_eeg_s.php:392
+[14-Mar-2018 21:47:56 UTC] PHP Fatal error:  Function name must be a string in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 113
+[14-Mar-2018 21:47:56 UTC] PHP Stack trace:
+[14-Mar-2018 21:47:56 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:59:24 UTC] PHP Warning:  array_search() expects parameter 2 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 249
+[14-Mar-2018 21:59:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:59:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:59:24 UTC] PHP   2. array_search() /home/ubuntu/workspace/small_scale/score_eeg_s.php:249
+[14-Mar-2018 21:59:24 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 278
+[14-Mar-2018 21:59:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:59:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:59:24 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 336
+[14-Mar-2018 21:59:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:59:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 21:59:24 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:336
+[14-Mar-2018 21:59:24 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 405
+[14-Mar-2018 21:59:24 UTC] PHP Stack trace:
+[14-Mar-2018 21:59:24 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:32 UTC] PHP Warning:  array_search() expects parameter 2 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 249
+[14-Mar-2018 22:01:32 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:32 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:32 UTC] PHP   2. array_search() /home/ubuntu/workspace/small_scale/score_eeg_s.php:249
+[14-Mar-2018 22:01:32 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 278
+[14-Mar-2018 22:01:32 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:32 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:32 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 336
+[14-Mar-2018 22:01:32 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:32 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:32 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:336
+[14-Mar-2018 22:01:32 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 405
+[14-Mar-2018 22:01:32 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:32 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:49 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 334
+[14-Mar-2018 22:01:49 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:49 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:49 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:334
+[14-Mar-2018 22:01:49 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 336
+[14-Mar-2018 22:01:49 UTC] PHP Stack trace:
+[14-Mar-2018 22:01:49 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:01:49 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:336
+[14-Mar-2018 22:05:20 UTC] PHP Warning:  array_search() expects parameter 2 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 249
+[14-Mar-2018 22:05:20 UTC] PHP Stack trace:
+[14-Mar-2018 22:05:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:05:20 UTC] PHP   2. array_search() /home/ubuntu/workspace/small_scale/score_eeg_s.php:249
+[14-Mar-2018 22:05:20 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 278
+[14-Mar-2018 22:05:20 UTC] PHP Stack trace:
+[14-Mar-2018 22:05:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:05:20 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 336
+[14-Mar-2018 22:05:20 UTC] PHP Stack trace:
+[14-Mar-2018 22:05:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:05:20 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:336
+[14-Mar-2018 22:05:20 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 406
+[14-Mar-2018 22:05:20 UTC] PHP Stack trace:
+[14-Mar-2018 22:05:20 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 205
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 205
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 205
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 205
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 336
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 22:08:37 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:336
+[14-Mar-2018 22:08:37 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 406
+[14-Mar-2018 22:08:37 UTC] PHP Stack trace:
+[14-Mar-2018 22:08:37 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP Warning:  Invalid argument supplied for foreach() in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 201
+[14-Mar-2018 23:21:08 UTC] PHP Stack trace:
+[14-Mar-2018 23:21:08 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP Warning:  array_keys() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 221
+[14-Mar-2018 23:21:08 UTC] PHP Stack trace:
+[14-Mar-2018 23:21:08 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP   2. array_keys() /home/ubuntu/workspace/small_scale/score_eeg_s.php:221
+[14-Mar-2018 23:21:08 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 221
+[14-Mar-2018 23:21:08 UTC] PHP Stack trace:
+[14-Mar-2018 23:21:08 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:221
+[14-Mar-2018 23:21:08 UTC] PHP Warning:  implode(): Invalid arguments passed in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 223
+[14-Mar-2018 23:21:08 UTC] PHP Stack trace:
+[14-Mar-2018 23:21:08 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP   2. implode() /home/ubuntu/workspace/small_scale/score_eeg_s.php:223
+[14-Mar-2018 23:21:08 UTC] PHP Warning:  array_sum() expects parameter 1 to be array, null given in /home/ubuntu/workspace/small_scale/score_eeg_s.php on line 408
+[14-Mar-2018 23:21:08 UTC] PHP Stack trace:
+[14-Mar-2018 23:21:08 UTC] PHP   1. {main}() /home/ubuntu/workspace/small_scale/score_eeg_s.php:0
+[14-Mar-2018 23:21:08 UTC] PHP   2. array_sum() /home/ubuntu/workspace/small_scale/score_eeg_s.php:408
